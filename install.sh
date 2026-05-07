@@ -118,6 +118,13 @@ fi
 # Instalar Claude Code
 if [[ "$INSTALL_WSL" == "1" ]]; then
     copy_dotfiles "$DOTFILES_DIR/claude" "$CLAUDE_CONFIG_DIR" "Claude Code (WSL/Linux)"
+
+    # Copiar templates (necessário para harness-apply.sh funcionar após install)
+    if [ -d "$REPO_DIR/templates" ]; then
+        mkdir -p "$CLAUDE_CONFIG_DIR/templates"
+        cp -r "$REPO_DIR/templates"/* "$CLAUDE_CONFIG_DIR/templates/"
+        echo "  ✅ templates/"
+    fi
 fi
 
 # Instalar Cursor

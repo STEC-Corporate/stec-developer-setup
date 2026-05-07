@@ -4,7 +4,18 @@
 set -e
 
 PROJECT_DIR="${1:-.}"
-TEMPLATES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../templates" && pwd)"
+
+# Detectar templates com fallback: primeiro tenta path relativo (dentro do repo), depois ~/.claude/templates/
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -d "$SCRIPT_DIR/../../../templates" ]; then
+    TEMPLATES_DIR="$(cd "$SCRIPT_DIR/../../../templates" && pwd)"
+elif [ -d "$HOME/.claude/templates" ]; then
+    TEMPLATES_DIR="$HOME/.claude/templates"
+else
+    echo "❌ Erro: templates não encontrados"
+    echo "Execute: cd ~/Projetos/stec-developer-setup && bash install.sh"
+    exit 1
+fi
 
 if [ ! -d "$PROJECT_DIR" ] || [ ! -d "$PROJECT_DIR/.git" ]; then
     echo "❌ Erro: $PROJECT_DIR não é um repositório Git válido"
