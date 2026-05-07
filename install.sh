@@ -4,7 +4,7 @@
 
 set -e
 
-REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")..." && pwd)"
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_DIR="$REPO_DIR/dotfiles"
 
 echo "🚀 Instalando Harness"
@@ -50,7 +50,7 @@ copy_dotfiles() {
 
     # Recursivamente copiar diretórios (ex: scripts/, agents/)
     for dir in "$SOURCE_DIR"/*; do
-        if [ -d "$dir" ] && [ -L "$dir" -eq 0 ]; then
+        if [ -d "$dir" ] && [ ! -L "$dir" ]; then
             DIRNAME=$(basename "$dir")
             DEST_SUBDIR="$DEST_DIR/$DIRNAME"
 
@@ -86,7 +86,7 @@ copy_dotfiles() {
 }
 
 # Detectar WSL2 e perguntar sobre ferramentas no Windows
-if [ "$PLATFORM" = "wsl2" ] && [ -d "/mnt/c/Users" ]; then
+if [[ "$PLATFORM" == "wsl2" ]] && [ -d "/mnt/c/Users" ]; then
     echo "🖥️  Detectado WSL2 com Windows disponível em /mnt/c"
     echo ""
     echo "Onde estão suas ferramentas? (Claude, Cursor, Codex)"
@@ -116,17 +116,17 @@ else
 fi
 
 # Instalar Claude Code
-if [ $INSTALL_WSL -eq 1 ]; then
+if [[ "$INSTALL_WSL" == "1" ]]; then
     copy_dotfiles "$DOTFILES_DIR/claude" "$CLAUDE_CONFIG_DIR" "Claude Code (WSL/Linux)"
 fi
 
 # Instalar Cursor
-if [ $INSTALL_WSL -eq 1 ]; then
+if [[ "$INSTALL_WSL" == "1" ]]; then
     copy_dotfiles "$DOTFILES_DIR/cursor" "$CURSOR_CONFIG_DIR" "Cursor (WSL/Linux)"
 fi
 
 # Instalar Codex
-if [ $INSTALL_WSL -eq 1 ]; then
+if [[ "$INSTALL_WSL" == "1" ]]; then
     copy_dotfiles "$DOTFILES_DIR/codex" "$CODEX_CONFIG_DIR" "Codex (WSL/Linux)"
 fi
 
@@ -149,7 +149,7 @@ echo "  • ~/.codex/ — Codex CLI harness"
 echo ""
 echo "📝 Próximos passos:"
 echo "  1. Abrir uma nova sessão ou terminal"
-echo "  2. Ir para um projeto com `.git`: cd ~/Projetos/seu-projeto"
+echo "  2. Ir para um projeto com git: cd ~/Projetos/seu-projeto"
 echo "  3. Claude/Cursor/Codex deve aplicar harness automaticamente"
 echo "  4. Executar: bash scripts/init.sh"
 echo ""

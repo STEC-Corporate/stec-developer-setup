@@ -37,11 +37,13 @@ resolve_paths() {
 
             # Detectar se ferramentas estão no Windows
             if [[ -d "/mnt/c/Users" ]]; then
-                # Tenta determinar o usuário Windows
-                WIN_USER=$(ls /mnt/c/Users | grep -v "^Public$" | head -1)
-                export WIN_USER
-                export CLAUDE_WIN="$APPDATA/Claude"
-                export CURSOR_WIN="/mnt/c/Users/$WIN_USER/.cursor"
+                # Tenta determinar o usuário Windows (exclui System, Public, etc)
+                WIN_USER=$(ls -1 /mnt/c/Users 2>/dev/null | grep -v -E "^(All Users|Default|Default User|Public|system)$" | head -1)
+                if [[ -n "$WIN_USER" ]]; then
+                    export WIN_USER
+                    export CLAUDE_WIN="/mnt/c/Users/$WIN_USER/AppData/Roaming/Claude"
+                    export CURSOR_WIN="/mnt/c/Users/$WIN_USER/.cursor"
+                fi
             fi
             ;;
 
