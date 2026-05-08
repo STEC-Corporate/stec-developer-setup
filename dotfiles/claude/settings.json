@@ -1,0 +1,39 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "input=$(cat); cmd=$(echo \"$input\" | jq -r '.tool_input.command // empty'); if echo \"$cmd\" | grep -qiE 'rm[[:space:]]+-rf[[:space:]]+/|git[[:space:]]+push[[:space:]].*(--force|-f[[:space:]])|git[[:space:]]+reset[[:space:]]+--hard|DROP[[:space:]]+(TABLE|DATABASE|SCHEMA)|mkfs\\.'; then echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"Guard-shell: comando destrutivo detectado.\"}}'; fi",
+            "timeout": 5,
+            "statusMessage": "Guard-shell..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "input=$(cat); printf \"%s [BASH] %s\\n\" \"$(date +%Y-%m-%dT%H:%M:%S)\" \"$(echo \"$input\" | jq -r '.tool_input.command // empty' | head -c 200)\" >> ~/.claude/bash-audit.log 2>/dev/null || true",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "printf '{\"systemMessage\":\"✅ Sessao encerrada. Checklist:\\n  - progress.md atualizado?\\n  - TaskLink/sistema registrado?\\n  - Commit feito?\\n  - Harness completo?\"}'"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -129,6 +129,47 @@ fi
 chmod +x "scripts/init.sh"
 echo "✅ scripts/init.sh agora é executável"
 
+# Criar .claude/settings.json com hooks por stack
+mkdir -p ".claude"
+CLAUDE_SETTINGS=".claude/settings.json"
+
+if [ ! -f "$CLAUDE_SETTINGS" ]; then
+    case "$STACK" in
+        node)
+            cat > "$CLAUDE_SETTINGS" << 'SETTINGS_EOF'
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/scripts/typecheck-hook.sh",
+            "asyncRewake": true,
+            "statusMessage": "TypeScript verificando...",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}
+SETTINGS_EOF
+            echo "✅ .claude/settings.json criado (typecheck hook)"
+            ;;
+        python|java|generic)
+            cat > "$CLAUDE_SETTINGS" << 'SETTINGS_EOF'
+{
+}
+SETTINGS_EOF
+            echo "✅ .claude/settings.json criado (placeholder extensível)"
+            ;;
+    esac
+else
+    echo "⏭️  .claude/settings.json já existe — pulando"
+fi
+
 # Fazer git add + commit dos arquivos criados
 echo ""
 echo "📦 Commitando mudanças..."
