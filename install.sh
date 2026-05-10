@@ -1,24 +1,24 @@
 #!/bin/bash
 # Instalador Harness — Linux / macOS / WSL2 / Git Bash
-# Copia configurações globais de harness para ~/.claude/, ~/.cursor/, ~/.codex/
+# Distribui hooks, agents, skills, scripts e rules para ~/.claude/, ~/.cursor/, ~/.codex/
+# Suporta cópia recursiva de subdiretórios (skills/, agents/, scripts/, rules/)
 
 set -e
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_DIR="$REPO_DIR/dotfiles"
 
-echo "🚀 Instalando Harness"
+echo "🚀 Instalando Harness completo (Claude + Cursor + Codex)"
 echo "📍 Repositório: $REPO_DIR"
 echo ""
 
 # Source detecção de ambiente
 source "$REPO_DIR/scripts/detect-env.sh"
 print_detection
-
 echo ""
 
-# Função helper para copiar arquivos
-copy_dotfiles() {
+# Função de cópia recursiva preservando estrutura completa
+copy_recursive_tree() {
     local SOURCE_DIR=$1
     local DEST_DIR=$2
     local TOOL_NAME=$3
@@ -30,57 +30,32 @@ copy_dotfiles() {
         return
     fi
 
-    # Criar diretório destino se não existir
     mkdir -p "$DEST_DIR"
 
-    # Copiar arquivos (sem sobrescrever)
-    for file in "$SOURCE_DIR"/*; do
-        if [ -f "$file" ]; then
-            FILENAME=$(basename "$file")
-            DEST_FILE="$DEST_DIR/$FILENAME"
+    local COPIED=0
+    local SKIPPED=0
 
-            if [ -f "$DEST_FILE" ]; then
-                echo "  ⏭️  $FILENAME já existe — pulando"
-            else
-                cp "$file" "$DEST_FILE"
-                echo "  ✅ $FILENAME"
-            fi
+    # Encontrar todos os arquivos (qualquer profundidade) e replicar estrutura
+    while IFS= read -r -d '' file; do
+        local REL_PATH="${file#$SOURCE_DIR/}"
+        local DEST_FILE="$DEST_DIR/$REL_PATH"
+        local DEST_PARENT=$(dirname "$DEST_FILE")
+
+        mkdir -p "$DEST_PARENT"
+
+        if [ -f "$DEST_FILE" ]; then
+            SKIPPED=$((SKIPPED + 1))
+        else
+            cp "$file" "$DEST_FILE"
+            COPIED=$((COPIED + 1))
+            echo "  ✅ $REL_PATH"
         fi
-    done
+    done < <(find "$SOURCE_DIR" -type f -print0)
 
-    # Recursivamente copiar diretórios (ex: scripts/, agents/)
-    for dir in "$SOURCE_DIR"/*; do
-        if [ -d "$dir" ] && [ ! -L "$dir" ]; then
-            DIRNAME=$(basename "$dir")
-            DEST_SUBDIR="$DEST_DIR/$DIRNAME"
+    # chmod +x em todos os .sh dentro de scripts/
+    find "$DEST_DIR" -path "*/scripts/*.sh" -type f -exec chmod +x {} \; 2>/dev/null || true
 
-            if [ "$DIRNAME" != ".git" ]; then
-                mkdir -p "$DEST_SUBDIR"
-
-                for file in "$dir"/*; do
-                    if [ -f "$file" ]; then
-                        FILENAME=$(basename "$file")
-                        DEST_FILE="$DEST_SUBDIR/$FILENAME"
-
-                        if [ -f "$DEST_FILE" ]; then
-                            echo "  ⏭️  $DIRNAME/$FILENAME já existe — pulando"
-                        else
-                            cp "$file" "$DEST_FILE"
-                            echo "  ✅ $DIRNAME/$FILENAME"
-                        fi
-                    fi
-                done
-
-                # chmod +x em scripts .sh
-                if [ "$DIRNAME" = "scripts" ]; then
-                    for file in "$DEST_SUBDIR"/*.sh; do
-                        [ -f "$file" ] && chmod +x "$file"
-                    done
-                fi
-            fi
-        fi
-    done
-
+    echo "  📊 $COPIED novo(s), $SKIPPED já existente(s) preservado(s)"
     echo "  ✅ $TOOL_NAME OK"
     echo ""
 }
@@ -97,44 +72,37 @@ if [[ "$PLATFORM" == "wsl2" ]] && [ -d "/mnt/c/Users" ]; then
     read -p "Escolha [1-3]: " INSTALL_TARGET
 
     case "$INSTALL_TARGET" in
-        2)
-            INSTALL_WSL=0
-            INSTALL_WIN=1
-            ;;
-        3)
-            INSTALL_WSL=1
-            INSTALL_WIN=1
-            ;;
-        *)
-            INSTALL_WSL=1
-            INSTALL_WIN=0
-            ;;
+        2) INSTALL_WSL=0; INSTALL_WIN=1 ;;
+        3) INSTALL_WSL=1; INSTALL_WIN=1 ;;
+        *) INSTALL_WSL=1; INSTALL_WIN=0 ;;
     esac
 else
     INSTALL_WSL=1
     INSTALL_WIN=0
 fi
 
-# Instalar Claude Code
+# Instalar Claude Code (recursivo)
 if [[ "$INSTALL_WSL" == "1" ]]; then
-    copy_dotfiles "$DOTFILES_DIR/claude" "$CLAUDE_CONFIG_DIR" "Claude Code (WSL/Linux)"
+    copy_recursive_tree "$DOTFILES_DIR/claude" "$CLAUDE_CONFIG_DIR" "Claude Code"
 
-    # Copiar templates (necessário para harness-apply.sh funcionar após install)
+    # Templates (necessário para harness-apply.sh)
     if [ -d "$REPO_DIR/templates" ]; then
+        echo "📦 Instalando templates Claude..."
         mkdir -p "$CLAUDE_CONFIG_DIR/templates"
-        cp -r "$REPO_DIR/templates"/* "$CLAUDE_CONFIG_DIR/templates/"
-        echo "  ✅ templates/"
+        cp -rn "$REPO_DIR/templates"/* "$CLAUDE_CONFIG_DIR/templates/" 2>/dev/null || true
+        echo "  ✅ templates/ copiados (sem sobrescrever)"
+        echo ""
     fi
 fi
 
-# Instalar Cursor
+# Instalar Cursor (recursivo: agents/ + skills/ + scripts/ + hooks.json)
 if [[ "$INSTALL_WSL" == "1" ]]; then
-    copy_dotfiles "$DOTFILES_DIR/cursor" "$CURSOR_CONFIG_DIR" "Cursor (WSL/Linux)"
+    copy_recursive_tree "$DOTFILES_DIR/cursor" "$CURSOR_CONFIG_DIR" "Cursor IDE"
 fi
 
-# Instalar Codex
+# Instalar Codex (recursivo: skills/ + rules/ + scripts/)
 if [[ "$INSTALL_WSL" == "1" ]]; then
-    copy_dotfiles "$DOTFILES_DIR/codex" "$CODEX_CONFIG_DIR" "Codex (WSL/Linux)"
+    copy_recursive_tree "$DOTFILES_DIR/codex" "$CODEX_CONFIG_DIR" "Codex CLI"
 fi
 
 # Instalar ~/CLAUDE.md (home-level, sempre)
@@ -148,18 +116,20 @@ fi
 echo ""
 echo "✨ Instalação concluída!"
 echo ""
-echo "📋 Resumo:"
-echo "  • ~/CLAUDE.md — Instrução imperativa (lido automaticamente)"
-echo "  • ~/.claude/ — Claude Code harness"
-echo "  • ~/.cursor/ — Cursor harness"
-echo "  • ~/.codex/ — Codex CLI harness"
+echo "📋 Resumo do que foi instalado:"
+echo "  • ~/CLAUDE.md            — Instrução imperativa (lido automaticamente)"
+echo "  • ~/.claude/             — Claude Code: settings.json + scripts + templates"
+echo "  • ~/.cursor/             — Cursor IDE: hooks.json + agents + skills + scripts"
+echo "  • ~/.codex/              — Codex CLI: rules + skills + scripts"
+echo ""
+echo "🔍 Validar instalação:"
+echo "  bash $REPO_DIR/scripts/validate-install.sh"
 echo ""
 echo "📝 Próximos passos:"
 echo "  1. Abrir uma nova sessão ou terminal"
-echo "  2. Ir para um projeto com git: cd ~/Projetos/seu-projeto"
-echo "  3. Claude/Cursor/Codex deve aplicar harness automaticamente"
-echo "  4. Executar: bash scripts/init.sh"
+echo "  2. Ir para um projeto: cd ~/Projetos/seu-projeto"
+echo "  3. Aplicar harness no projeto: bash ~/.claude/scripts/harness-apply.sh"
 echo ""
 echo "📚 Referência:"
-echo "  • Harness: @~/.claude/HARNESS.md (ou ~/.cursor/HARNESS.md)"
-echo "  • Atualizar: git pull && bash install.sh"
+echo "  • Harness: @~/.claude/HARNESS.md (ou ~/.cursor/HARNESS.md, ~/.codex/HARNESS.md)"
+echo "  • Atualizar: cd $REPO_DIR && git pull && bash install.sh"

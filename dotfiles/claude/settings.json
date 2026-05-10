@@ -23,6 +23,17 @@
             "async": true
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/scripts/progress-update.sh",
+            "async": true,
+            "statusMessage": "Atualizando progress.md..."
+          }
+        ]
       }
     ],
     "Stop": [
@@ -30,7 +41,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "printf '{\"systemMessage\":\"✅ Sessao encerrada. Checklist:\\n  - progress.md atualizado?\\n  - TaskLink/sistema registrado?\\n  - Commit feito?\\n  - Harness completo?\"}'"
+            "command": "printf '{\"systemMessage\":\"✅ Sessao encerrada. Checklist:\\n  - progress.md atualizado?\\n  - TaskLink/sistema registrado?\\n  - Commit feito?\\n  - git push enviado?\\n  - Harness completo?\"}'"
           }
         ]
       }

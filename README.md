@@ -33,17 +33,42 @@ Com harness, **todo novo projeto têm automaticamente:**
 
 ---
 
-## 📦 O que será instalado
+## 📦 O que será instalado (Distribuição Completa)
 
+A instalação distribui automaticamente hooks, agents, skills, scripts e rules para as 3 IDEs:
+
+### Claude Code (`~/.claude/`)
+| Recurso | Origem | Função |
+|---------|--------|--------|
+| `settings.json` | `dotfiles/claude/` | Hooks PreToolUse, PostToolUse, Stop (Guard-shell + Audit + Auto-progress + Checklist) |
+| `HARNESS.md` | `dotfiles/claude/` | Referência conceitual |
+| `scripts/harness-apply.sh` | `dotfiles/claude/scripts/` | Aplica harness universal (Claude+Cursor+Codex) em projetos |
+| `scripts/typecheck-hook.sh` | `dotfiles/claude/scripts/` | Hook TypeScript |
+| `scripts/progress-update.sh` | `dotfiles/claude/scripts/` | Atualiza `progress.md` automaticamente |
+| `templates/` | `templates/` | Templates Python, Node, Java, generic |
+
+### Cursor IDE (`~/.cursor/`)
+| Recurso | Origem | Função |
+|---------|--------|--------|
+| `hooks.json` | `dotfiles/cursor/` | Hooks beforeShellExecution, afterFileEdit, stop |
+| `HARNESS.md` | `dotfiles/cursor/` | Referência conceitual |
+| `agents/` (8 agents) | `dotfiles/cursor/agents/` | harness-apply, java/kotlin/nestjs/nextjs/python/react/react-native especialistas |
+| `skills/` (12 skills) | `dotfiles/cursor/skills/` | gates (arquitetura/ci/segurança/testes) + workflows-base por stack |
+| `scripts/` (4 scripts) | `dotfiles/cursor/scripts/` | guard-shell, progress-update, checklist, harness-apply |
+
+### Codex CLI (`~/.codex/`)
+| Recurso | Origem | Função |
+|---------|--------|--------|
+| `HARNESS.md` | `dotfiles/codex/` | Referência conceitual |
+| `instructions.md` | `dotfiles/codex/` | Instruções automáticas |
+| `skills/` (2 skills) | `dotfiles/codex/skills/` | cursor-agent-orchestrator, cursor-project-standards |
+| `rules/default.rules` | `dotfiles/codex/rules/` | Rules globais |
+| `scripts/` (4 scripts) | `dotfiles/codex/scripts/` | guard-shell, progress-update, checklist, harness-apply |
+
+### Home Level
 | Arquivo | Onde vai | O que é |
 |---------|----------|--------|
-| `CLAUDE.md` | `~/CLAUDE.md` | Instrução imperativa: aplica harness automaticamente |
-| `HARNESS.md` | `~/.claude/`, `~/.cursor/`, `~/.codex/` | Referência conceitual (fórmula + 3 camadas) |
-| `harness-apply.sh` | `~/.claude/scripts/` | Script que detecta stack e cria estrutura |
-| `harness-apply.md` | `~/.cursor/agents/` | Agent Cursor (chamável com `@harness-apply`) |
-| `instructions.md` | `~/.codex/` | Instrução automática Codex CLI |
-
-**Total:** 5-8 arquivos por ferramenta, ~50KB total.
+| `CLAUDE.md` | `~/CLAUDE.md` | Instrução imperativa global (lido por todas IDEs) |
 
 ---
 
@@ -133,17 +158,20 @@ Padrão: instala em `~/.claude/`, `~/.cursor/`, `~/.codex/` (home do Git Bash)
 
 ---
 
-## 🔄 Como atualizar
+## 🔄 Como atualizar e validar
 
-O harness evolui. Manter sincronizado:
+O harness evolui. Para manter sincronizado e validar:
 
 ```bash
 cd ~/Projetos/stec-developer-setup
 git pull
-bash install.sh
+bash install.sh                    # Distribui tudo (recursivo)
+bash scripts/validate-install.sh   # Valida paridade IDE ↔ repositório
 ```
 
-O script nunca sobrescreve arquivos existentes — apenas instala novos.
+O `install.sh` nunca sobrescreve arquivos existentes — apenas instala novos.
+
+O `validate-install.sh` compara recursivamente cada arquivo de `dotfiles/` com o que está em `~/.claude/`, `~/.cursor/` e `~/.codex/`, reportando o que está faltando.
 
 Para **forçar atualização** de arquivos:
 ```bash
@@ -173,42 +201,48 @@ Para entender o harness profundamente:
 
 ```
 stec-developer-setup/
-├── README.md                     # Este arquivo
-├── install.sh                    # Instalador Linux/macOS/WSL2/Git Bash
-├── install.ps1                   # Instalador Windows PowerShell
+├── README.md                       # Este arquivo
+├── install.sh                      # Instalador (cópia recursiva)
+├── install.ps1                     # Instalador Windows PowerShell
 ├── scripts/
-│   └── detect-env.sh             # Detecção de plataforma (sourced)
+│   ├── detect-env.sh               # Detecção de plataforma (sourced)
+│   └── validate-install.sh         # Valida paridade IDE ↔ repo
 ├── dotfiles/
 │   ├── home/
-│   │   └── CLAUDE.md             # ~/CLAUDE.md (instrução global)
-│   ├── claude/
-│   │   ├── HARNESS.md            # ~/.claude/HARNESS.md
+│   │   └── CLAUDE.md               # ~/CLAUDE.md (instrução global)
+│   ├── claude/                     # Claude Code
+│   │   ├── HARNESS.md
+│   │   ├── settings.json           # Hooks: PreToolUse + PostToolUse + Stop
 │   │   └── scripts/
-│   │       └── harness-apply.sh  # Script de aplicação
-│   ├── cursor/
-│   │   ├── HARNESS.md            # ~/.cursor/HARNESS.md
-│   │   └── agents/
-│   │       └── harness-apply.md  # Agent Cursor
-│   └── codex/
-│       ├── HARNESS.md            # ~/.codex/HARNESS.md
-│       └── instructions.md       # Instrução Codex CLI
+│   │       ├── harness-apply.sh    # Universal (Claude+Cursor+Codex)
+│   │       ├── typecheck-hook.sh   # TypeScript hook
+│   │       └── progress-update.sh  # Auto-update progress.md
+│   ├── cursor/                     # Cursor IDE
+│   │   ├── HARNESS.md
+│   │   ├── hooks.json              # Hooks Cursor (beforeShellExecution etc)
+│   │   ├── agents/                 # 8 agents (harness-apply + 7 especialistas)
+│   │   ├── skills/                 # 12 skills (gates + workflows-base)
+│   │   └── scripts/
+│   │       ├── guard-shell.sh
+│   │       ├── progress-update.sh
+│   │       ├── checklist.sh
+│   │       └── harness-apply.sh
+│   └── codex/                      # Codex CLI
+│       ├── HARNESS.md
+│       ├── instructions.md
+│       ├── skills/                 # 2 skills
+│       ├── rules/
+│       │   └── default.rules
+│       └── scripts/
+│           ├── guard-shell.sh
+│           ├── progress-update.sh
+│           ├── checklist.sh
+│           └── harness-apply.sh
 └── templates/
-    ├── python/
-    │   ├── CLAUDE.md             # Template Python
-    │   ├── progress.md
-    │   └── init.sh
-    ├── node/
-    │   ├── CLAUDE.md             # Template Node/TypeScript
-    │   ├── progress.md
-    │   └── init.sh
-    ├── java/
-    │   ├── CLAUDE.md             # Template Java
-    │   ├── progress.md
-    │   └── init.sh
-    └── generic/
-        ├── CLAUDE.md             # Template genérico
-        ├── progress.md
-        └── init.sh
+    ├── python/                     # Template Python
+    ├── node/                       # Template Node/TypeScript
+    ├── java/                       # Template Java
+    └── generic/                    # Template genérico
 ```
 
 ---
@@ -258,6 +292,7 @@ Problemas com o harness?
 | Data | Mudança |
 |------|---------|
 | 2026-05-06 | v1.0 — Setup inicial com templates 4 stacks, dual-platform (Bash + PowerShell) |
+| 2026-05-10 | v2.0 — Sincronização completa: hooks, agents (8), skills (12+2), scripts e rules para Claude+Cursor+Codex. Adicionado `validate-install.sh` e cópia recursiva no `install.sh`. |
 
 ---
 

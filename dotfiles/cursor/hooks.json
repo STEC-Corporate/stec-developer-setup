@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": "bash ~/.cursor/scripts/guard-shell.sh",
+        "timeout": 5000,
+        "description": "Bloqueia comandos destrutivos (rm -rf /, git push --force, DROP TABLE, mkfs)"
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": "bash ~/.cursor/scripts/progress-update.sh",
+        "async": true,
+        "description": "Atualiza progress.md automaticamente após edições em projetos com harness"
+      }
+    ],
+    "stop": [
+      {
+        "command": "bash ~/.cursor/scripts/checklist.sh",
+        "description": "Exibe checklist de fim de sessão (progress.md, commit, push)"
+      }
+    ]
+  }
+}
