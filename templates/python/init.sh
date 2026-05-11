@@ -8,6 +8,111 @@ cd "$PROJECT_DIR"
 
 echo "🚀 Inicializando projeto Python em $PROJECT_DIR"
 
+# ============================================================================
+# Setup .env.local (por developer)
+# ============================================================================
+
+setup_env_local() {
+    # Detectar ambiente se script existir
+    DETECT_SCRIPT="../../scripts/detect-env.sh"
+    if [ -f "$DETECT_SCRIPT" ]; then
+        source "$DETECT_SCRIPT"
+        DETECTED_PLATFORM=$(detect_platform)
+        resolve_paths "$DETECTED_PLATFORM"
+    else
+        # Fallback simples
+        PLATFORM="unknown"
+        CLAUDE_CONFIG_DIR="$HOME/.claude"
+        CURSOR_CONFIG_DIR="$HOME/.cursor"
+        CODEX_CONFIG_DIR="$HOME/.codex"
+        WIN_USER=""
+    fi
+
+    # Gerar .env.local se não existir
+    if [ ! -f ".env.local" ]; then
+        cat > .env.local << EOF
+# Auto-gerado em $(date '+%Y-%m-%d %H:%M:%S')
+# Customizar conforme necessário
+
+PLATFORM=$DETECTED_PLATFORM
+PROJECT_ROOT=$PROJECT_DIR
+USER_NAME=$(whoami)
+CLAUDE_CONFIG_DIR=$CLAUDE_CONFIG_DIR
+CURSOR_CONFIG_DIR=$CURSOR_CONFIG_DIR
+CODEX_CONFIG_DIR=$CODEX_CONFIG_DIR
+$([ -n "$WIN_USER" ] && echo "WIN_USER=$WIN_USER")
+
+# Customizações (descomentar conforme necessário)
+# DEBUG=false
+# LOG_LEVEL=info
+EOF
+        echo "✅ .env.local criado"
+    else
+        echo "ℹ️  .env.local já existe"
+    fi
+
+    # Criar .env.example se não existir
+    if [ ! -f ".env.example" ]; then
+        cp ../../.env.example .env.example 2>/dev/null || cat > .env.example << 'EOF'
+PLATFORM=auto
+PROJECT_ROOT=.
+USER_NAME=unknown
+CLAUDE_CONFIG_DIR=
+CURSOR_CONFIG_DIR=
+CODEX_CONFIG_DIR=
+WIN_USER=
+EOF
+        echo "✅ .env.example criado"
+    fi
+
+    # Criar .gitignore se não existir
+    if [ ! -f ".gitignore" ]; then
+        cat > .gitignore << 'EOF'
+# Ambiente
+.env
+.env.local
+.env.*.local
+
+# Dependências
+node_modules/
+venv/
+.venv/
+env/
+__pycache__/
+*.pyc
+
+# Build
+dist/
+build/
+out/
+target/
+*.egg-info/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testes
+coverage/
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Logs
+logs/
+*.log
+EOF
+        echo "✅ .gitignore criado"
+    fi
+}
+
+setup_env_local
+echo ""
+
 # Detectar gerenciador de pacotes
 if [ -f "pyproject.toml" ] && grep -q "tool.poetry" pyproject.toml; then
     echo "📦 Detectado: Poetry"
