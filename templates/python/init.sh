@@ -10,7 +10,7 @@ echo "🚀 Inicializando projeto Python em $PROJECT_DIR"
 echo ""
 
 # Source helper para setup .env.local
-HELPER_SCRIPT="../../scripts/init-env-helper.sh"
+HELPER_SCRIPT="scripts/init-env-helper.sh"
 if [ ! -f "$HELPER_SCRIPT" ]; then
     HELPER_SCRIPT="$HOME/.claude/scripts/init-env-helper.sh"
 fi
