@@ -125,14 +125,27 @@ Resultado Final: Recursos globais + customizações locais (locais sobrescrevem 
 
 ### Origem: dotfiles/global/ → Destino: ~/.claude/, ~/.cursor/, ~/.codex/
 
-| Recurso | Origem | Claude | Cursor | Codex |
-|---------|--------|--------|--------|-------|
-| **agents/** | global/agents/ | (não usa) | ~/.cursor/agents/ | ~/.codex/agents/ |
-| **skills/** | global/skills/ | ~/.claude/skills/ | ~/.cursor/skills/ | ~/.codex/skills/ |
-| **rules/** | global/rules/ | (guardrails em CLAUDE.md) | ~/.cursor/rules/ | ~/.codex/rules/ |
-| **codex-skills/** | global/codex-skills/ | - | - | ~/.codex/agents/ ⭐ |
-| **hooks/** | global/hooks/ | ~/.claude/mcp/ (converter) | ~/.cursor/hooks.json | ~/.codex/rules/ |
-| **mcp/** | global/mcp/ | ~/.claude/mcp/ | - | - |
+| Artefatos em `dotfiles/global/` | Claude (`~/.claude`) | Cursor (`~/.cursor`) | Codex (`~/.codex`) |
+|--------------------------------|----------------------|----------------------|---------------------|
+| `agents/` (agents .md) | **Ignorar** (não usa agents nativos) | `agents/` ← cópia direta | `agents/` ← cópia direta |
+| `skills/**` (SKILL.md genéricos) | `skills/` ← cópia direta | `skills/` ← cópia direta | `skills/` ← cópia direta |
+| `codex-skills/**` (ex-`codex-skills/`) | — | — | **`agents/`** ← cópia direta ⭐ |
+| `rules/*.mdc` | Guardrails em CLAUDE.md (política adicional) | `rules/` ← cópia direta | `rules/` ← cópia direta |
+| `hooks/` + `hooks.json` | Converter para MCP server config | `hooks.json` ← cópia com **paths absolutos** | Converter para `.rules` DSL |
+| `mcp/` | `mcp/` ← cópia direta | — | — |
+| `plans/` | Opcional (se Claude consumir) | Opcional (se Cursor consumir) | Opcional (se Codex consumir) |
+| `schemas/` | Opcional (estrutura) | Opcional (estrutura) | Opcional (estrutura) |
+
+### Nota sobre Conversão e Transformação
+
+**Recursos que NÃO precisam conversão** (cópia 1:1):
+- ✅ `skills/**/*.md` — Formato genérico Markdown, nativo para todas as IDEs
+- ✅ `agents/*.md` — Formato nativo para Cursor e Codex
+- ✅ `codex-skills/**` — Já em formato Codex, cópia direta para `~/.codex/agents/`
+
+**Recursos que REQUEREM conversão** (transformação necessária):
+- 🔄 `hooks/` — JSON genérico → format específico por IDE
+- 🔄 `rules/*.mdc` — Markdown Context → DSL específica (Cursor `.mdc`, Codex `.rules`)
 
 ### Nota Especial: codex-skills
 
@@ -286,6 +299,102 @@ dotfiles/global/
 │
 └── README.md                         # Cópia do README.md do AI-ProjectDeveloper
 ```
+
+---
+
+## 🔄 Diagrama de Fluxo da Arquitetura
+
+```mermaid
+flowchart LR
+  subgraph repo [stec-developer-setup]
+    G["dotfiles/global<br/>(AI-ProjectDeveloper)"]
+    OC["dotfiles/claude<br/>(Customizações)"]
+    OX["dotfiles/codex<br/>(Customizações)"]
+    OR["dotfiles/cursor<br/>(Customizações)"]
+  end
+  subgraph home [Home do Utilizador]
+    HC["~/.claude<br/>(Claude Code)"]
+    HX["~/.codex<br/>(Codex CLI)"]
+    HR["~/.cursor<br/>(Cursor IDE)"]
+  end
+  
+  G -->|"skills/ rules/ hooks/ mcp/"| HC
+  G -->|"skills/ codex-skills→agents/"| HX
+  G -->|"agents/ skills/ rules/ hooks/"| HR
+  
+  OC -->|"override"| HC
+  OX -->|"override"| HX
+  OR -->|"override"| HR
+  
+  style G fill:#e1f5ff
+  style HC fill:#fff3e0
+  style HX fill:#f3e5f5
+  style HR fill:#e8f5e9
+```
+
+**Fluxo:**
+1. **Global** (`dotfiles/global/`) → Distribui recursos para as três IDEs (Fase 1 do install.sh)
+2. **Overlays** (`dotfiles/[ide]/`) → Sobrescrevem configurações globais com customizações locais (Fase 2 do install.sh)
+3. **Resultado**: Cada IDE recebe config global + sobreposição local
+
+---
+
+## ⚠️ Riscos e Decisões a Fechar
+
+### **Risco 1: Colisão entre `global/skills/` e `global/codex-skills/` em `~/.codex/`**
+
+**Cenário:** Ambas as pastas instalam em `~/.codex/skills/` (ou `~/.codex/agents/` no caso de codex-skills).
+
+**Mitigação:**
+- ✅ **Precedência definida:** `codex-skills/` SEMPRE sobrescreve `skills/` em caso de nome duplicado
+- ✅ **Documentar:** Adicionar aviso em `dotfiles/global/README.md` e `SKILL.md` de skills genéricas indicando que Codex é especializado
+- ✅ **Teste de colisão:** Validar no Fase 7 se há nomes duplicados
+
+---
+
+### **Risco 2: Conflito de nome entre `global/skills/<x>/` e `global/agents/<x>.md` para Claude**
+
+**Cenário:** Um agente `.md` e uma skill com mesmo nome (ex.: `code-reviewer`) precisam ambos existir em `~/.claude/skills/`.
+
+**Mitigação:**
+- ✅ **Claude não usa agents nativos**, apenas skills — ignorar agents completamente para Claude
+- ✅ **Naming convention:** Agentes em cursor/codex recebem prefixo se necessário (ex.: `agent-code-reviewer`)
+- ✅ **Documentação:** Clarificar que agents são Cursor/Codex, skills são genéricas
+
+---
+
+### **Risco 3: `hooks.json` — merge entre hooks corporativos e locais**
+
+**Cenário:** `dotfiles/global/hooks.json` (corporativo) + `dotfiles/cursor/hooks.json` (STEC-local) podem estar em conflito.
+
+**Mitigação:**
+- ✅ **Fonte única canônica:** `dotfiles/global/hooks.json` contém lista corporativa completa
+- ✅ **Local override:** `dotfiles/cursor/hooks.json` sobrescreve Fase 1 (usar `copy_recursive_tree` com sobrescrita)
+- ✅ **Validação:** Script de merge/validação em `scripts/validate-hooks.sh` compara ambas e alerta sobre conflitos
+- ✅ **Paths absolutos:** Documentar que `hooks.json` DEVE conter paths absolutos `~/.cursor/hooks/...` para instalação global
+
+---
+
+### **Risco 4: Referências relativas em `.mdc` para `../agents/` podem quebrar após instalação**
+
+**Cenário:** Um arquivo `.mdc` em `dotfiles/global/rules/` referencia `../agents/agente.md`, mas em `~/.cursor/rules/` essa estrutura não existe.
+
+**Mitigação:**
+- ✅ **Validação estrutural:** Fase 7 testa se links relativos funcionam após instalação
+- ✅ **Documentação:** Adicionar seção em `dotfiles/global/rules/README.md` sobre estrutura esperada
+- ✅ **Se necessário:** Converter referências relativas em links absolutos ou avisos comentados
+
+---
+
+### **Risco 5: Sincronização de `dotfiles/global/` com AI-ProjectDeveloper futura**
+
+**Cenário:** Após primeira sincronização, como manter `dotfiles/global/` atualizado quando AI-ProjectDeveloper mudar?
+
+**Mitigação:**
+- ✅ **Script de sincronização:** Criar `scripts/sync-from-ai-projectdeveloper.sh` (ver D3 abaixo)
+- ✅ **Processo documentado:** Guia em `docs/ATUALIZACAO-CATÁLOGO.md` explicando procedimento
+- ✅ **Safety checks:** Script deve validar integridade e pedir aprovação antes de commit
+- ✅ **Versionamento:** Cada sincronização é um commit com referência ao rev do AI-ProjectDeveloper
 
 ---
 
@@ -612,17 +721,65 @@ git commit -m "chore: remove .cursor submodule, migrated to dotfiles/global/"
 
 ---
 
+---
+
+## ✅ Checklist de Trabalho (TODOs Estruturados)
+
+| ID | Atividade | Status | Fase | Bloqueante |
+|----|-----------|---------|----|-----------|
+| **TODO-1** | Inventariar árvore AI-ProjectDeveloper e listar topo obrigatório de dotfiles/global (incl. hooks.json, mcp, plans, schemas) | ⏳ Pending | 1 | Não |
+| **TODO-2** | Criar dotfiles/global/ espelhando AI-PD e popular cópia definitiva (origem: último .cursor/ ou clone) | ⏳ Pending | 2-3 | Após TODO-1 |
+| **TODO-3** | Mover/dedup conteúdos de dotfiles/[claude\|codex\|cursor] para global ou manter como overlay; unificar scripts harness numa fonte única | ⏳ Pending | 4 | Após TODO-2 |
+| **TODO-4** | Transcrições: hooks.json paths absolutos; Codex .rules vs Cursor .mdc; agents .md → ~/.claude/skills/ + Cursor ~/.cursor/agents; AGENTS.md Codex conforme mapeamento | ⏳ Pending | 4 | Após TODO-3 |
+| **TODO-5** | Reescrever install.sh: stage_global + stage_overlay; cópia sempre com substituição (rsync/cp sem preservar destinos antigos) + chmod scripts | ⏳ Pending | 5 | Após TODO-4 |
+| **TODO-6** | Validar install.sh com testes; atualizar validate-install.sh/README; marcar PLANO-INTEGRACAO antigo como superado; preparar passo opcional remoção submodule | ⏳ Pending | 5-7 | Após TODO-5 |
+
+**Legenda:**
+- ⏳ Pending = Não iniciado
+- 🔄 In Progress = Em execução
+- ✅ Completed = Concluído
+- 🚫 Blocked = Bloqueado por outro
+
+---
+
 ## 🚀 Próximas Ações (após aprovação)
 
-1. Responder perguntas de decisão acima
-2. Executar Fase 1 (preparação e catalogação)
-3. Executar Fase 2-3 (criar estrutura e migrar)
-4. Testar em projeto piloto (Fase 7)
-5. Comunicar mudanças para equipe (Fase 8)
-6. Remover V1 (submodule) do repositório
+### **Imediato (antes da Fase 1):**
+1. ✅ **Responder decisões arquiteturais (D1-D3):**
+   - D1: Versionar `dotfiles/global/`? (Recomendado: **Sim**)
+   - D2: `dotfiles/global/` será imutável? (Recomendado: **Sim**)
+   - D3: Processo de atualização de `dotfiles/global/`? (Recomendado: **Script automatizado**)
+
+2. ✅ **Responder perguntas de planejamento (P1-P4):**
+   - P1: Todos os 316 skills em `dotfiles/global/`?
+   - P2: Tamanho estimado (estimar com TODO-1)
+   - P3: Frequência de atualização do AI-ProjectDeveloper?
+   - P4: Preservar conteúdo de `dotfiles/[claude|cursor|codex]` existente?
+
+### **Fases de Execução:**
+
+| Fase | Atividades | Responsável | Estimado |
+|------|-----------|-------------|----------|
+| **Fase 1** | TODO-1: Inventário e catalogação | — | 2-3 horas |
+| **Fase 2-3** | TODO-2: Criar estrutura e migrar | — | 4-6 horas |
+| **Fase 4** | TODO-3 + TODO-4: Reorganizar e transcrever | — | 3-4 horas |
+| **Fase 5** | TODO-5: Reescrever install.sh | — | 2-3 horas |
+| **Fase 6** | Remover submodule (opcional, depois) | — | 30 min |
+| **Fase 7** | TODO-6: Testes e validação | — | 2-3 horas |
+| **Fase 8** | Documentação e comunicação | — | 2-3 horas |
+
+---
+
+## 📚 Documentação Relacionada
+
+- **Mapeamento de IDEs:** `docs/ferramentas/Mapeamento-Arquivos-IDEs.md` (atualizar com nova estrutura)
+- **Plano anterior (deprecado):** `docs/PLANO-INTEGRACAO-CURSOR-SKILLS.md` (marcar como superado)
+- **Guias de sincronização:** Criar `docs/ATUALIZACAO-CATÁLOGO.md`
+- **Arquitetura nova:** Criar `docs/ARQUITETURA-DOTFILES-V2.md`
 
 ---
 
 **Documento criado em:** 10 de maio de 2026  
-**Status:** Aguardando aprovação do plano  
-**Próximo documento a ser deletado:** `docs/PLANO-INTEGRACAO-CURSOR-SKILLS.md` (versão anterior)
+**Última atualização:** 11 de maio de 2026  
+**Status:** ✨ Unificado (integração de V2 + Cursor Plan completa)  
+**Próximo passo:** Aprovação de D1-D3 e P1-P4, depois Fase 1
