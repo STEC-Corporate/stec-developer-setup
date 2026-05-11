@@ -100,7 +100,9 @@ Fase 2: Copia específicas → home (sobrescreve Fase 1, se houver)
 Resultado Final: Recursos globais + customizações locais
 ```
 
-⭐ **Nota Importante sobre `codex-skills/`:** A pasta `dotfiles/global/codex-skills/` contém skills que já foram convertidas e formatadas especificamente para o Codex. Diferente das skills genéricas, **estes arquivos devem ser copiados para `~/.codex/agents/` SEM qualquer transformação adicional**, pois já estão no formato esperado pelo Codex.
+⭐ **Nota Importante:**
+- A pasta `dotfiles/global/skills/` contém skills genéricas em Markdown que são redistribuídas para **Claude Code** (`~/.claude/skills/`), **Cursor** (`~/.cursor/skills/`) e **Codex** (`~/.codex/skills/`).
+- A pasta `dotfiles/global/codex-skills/` contém skills já convertidas e formatadas especificamente para o **Codex CLI**. Diferente das skills genéricas, **estes arquivos devem ser copiados para `~/.codex/agents/` SEM qualquer transformação adicional**, pois já estão no formato esperado pelo Codex.
 
 ---
 
@@ -128,15 +130,50 @@ Resultado Final: Recursos globais + customizações locais
 Se um recurso for **formatado diferentemente** para cada IDE, deve ser transcrito conforme esperado:
 
 **Exemplo:**
-- `global/agents/meu-agente.md` (formato padrão YAML+MD)
-  - → Para Claude: Ignorar (não usa agents como .md)
-  - → Para Cursor: Copiar como-é em ~/.cursor/agents/
-  - → Para Codex: Copiar como-é em ~/.codex/agents/
 
-- `global/hooks/` (formato JSON)
-  - → Para Claude: Converter para MCP server config em ~/.claude/mcp/
-  - → Para Cursor: Copiar como hooks.json em ~/.cursor/
-  - → Para Codex: Converter para .rules DSL em ~/.codex/rules/
+1. **Skills** (`global/skills/*/SKILL.md`) — Formato unificado, usado por TODOS
+   - → Para Claude: Copiar como-é em `~/.claude/skills/` (Skills em Markdown)
+   - → Para Cursor: Copiar como-é em `~/.cursor/skills/` (Skills em Markdown)
+   - → Para Codex: Copiar como-é em `~/.codex/skills/` (Skills em Markdown)
+
+2. **Agents** (`global/agents/*.md`) — Formato Markdown+YAML, usado por Cursor e Codex
+   - → Para Claude: Ignorar (não utiliza agents)
+   - → Para Cursor: Copiar como-é em `~/.cursor/agents/`
+   - → Para Codex: Copiar como-é em `~/.codex/agents/`
+
+3. **Hooks** (`global/hooks/`) — Formato JSON, requer conversão
+   - → Para Claude: Converter para MCP server config em `~/.claude/mcp/`
+   - → Para Cursor: Copiar como `hooks.json` em `~/.cursor/hooks.json`
+   - → Para Codex: Converter para `.rules` DSL em `~/.codex/rules/`
+
+---
+
+## ⭐ Tratamento Especial: `claude-skills/` (global/skills/)
+
+A pasta `dotfiles/global/skills/` contém um conjunto de **skills em Markdown** que definem agentes especializados personalizados para o Claude Code. Estas skills são formato genérico que funciona diretamente em todas as três IDEs sem necessidade de conversão.
+
+### Regra de Cópia para Claude Skills
+
+| Origem | Destino | Conversão | Nota |
+|--------|---------|-----------|------|
+| `global/skills/*/SKILL.md` | `~/.claude/skills/` | **NENHUMA** | Copiar diretamente, Claude lê Markdown nativamente |
+
+### Justificativa
+
+- Claude Code utiliza **Skills em Markdown** como mecanismo nativo de personalização
+- Cada skill é uma pasta em `global/skills/{skill-name}/` contendo `SKILL.md`
+- O arquivo `SKILL.md` define o comportamento e diretrizes da skill em linguagem natural
+- Skills são automaticamente descobertas e invocáveis dentro do Claude Code quando presentes em `~/.claude/skills/`
+- Não requer conversão — o formato Markdown é nativo e portável
+
+### No install.sh
+
+A linha de cópia deve ser:
+```bash
+copy_recursive_tree "$DOTFILES_DIR/global/skills" "$CLAUDE_CONFIG_DIR/skills" "Global Skills → Claude"
+```
+
+**Nota:** Diferente de agents (que Claude não usa), skills são **o mecanismo principal** de personalização do Claude Code.
 
 ---
 
