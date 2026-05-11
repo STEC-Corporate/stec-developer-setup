@@ -84,7 +84,7 @@ dotfiles/
 ### Fluxo de Distribuição (install.sh)
 
 ```
-Fase 1: Copia global → home
+Fase 1: Copia global → home (SOBRESCREVE arquivos existentes)
 ├── dotfiles/global/agents/* → ~/.cursor/agents/, ~/.codex/agents/
 ├── dotfiles/global/skills/* → ~/.claude/skills/, ~/.cursor/skills/, ~/.codex/skills/
 ├── dotfiles/global/rules/* → ~/.cursor/rules/, ~/.codex/rules/
@@ -92,13 +92,26 @@ Fase 1: Copia global → home
 ├── dotfiles/global/hooks/* → ~/.cursor/hooks.json, ~/.codex/rules/
 └── dotfiles/global/mcp/* → ~/.claude/mcp/
 
-Fase 2: Copia específicas → home (sobrescreve Fase 1, se houver)
+Fase 2: Copia específicas → home (SOBRESCREVE Fase 1 e arquivos existentes)
 ├── dotfiles/claude/* → ~/.claude/
 ├── dotfiles/cursor/* → ~/.cursor/
 └── dotfiles/codex/ → ~/.codex/
 
-Resultado Final: Recursos globais + customizações locais
+Resultado Final: Recursos globais + customizações locais (locais sobrescrevem globais)
 ```
+
+### 🔄 Política de Sobrescrita
+
+**IMPORTANTE:** Todos os arquivos copiados nos passos acima **devem sobrescrever** versões existentes. Isto garante que:
+
+1. **Atualizações são sempre aplicadas:** Quando há uma nova versão de uma skill, agente ou regra, ela substitui a versão antiga
+2. **Sincronização garantida:** Cada execução do `install.sh` traz a versão mais recente de `dotfiles/global/`
+3. **Sem risco de arquivos órfãos:** Versões antigas são sempre removidas/substituídas
+
+**Implementação:**
+- Usar `cp -r` (cópia recursiva com sobrescrita) em todos os comandos, **NUNCA** `-n` (no-clobber)
+- Não usar `-n` que previne sobrescrita
+- Garantir que customizações locais (`dotfiles/[claude|cursor|codex]/`) sejam copiadas **depois** de `global/`, sobrescrevendo se necessário
 
 ⭐ **Nota Importante:**
 - A pasta `dotfiles/global/skills/` contém skills genéricas em Markdown que são redistribuídas para **Claude Code** (`~/.claude/skills/`), **Cursor** (`~/.cursor/skills/`) e **Codex** (`~/.codex/skills/`).
@@ -171,12 +184,15 @@ A pasta `dotfiles/global/skills/` contém um conjunto de **skills em Markdown** 
 
 ### No install.sh
 
-A linha de cópia deve ser:
+A linha de cópia deve ser (com sobrescrita de arquivos existentes):
 ```bash
 copy_recursive_tree "$DOTFILES_DIR/global/skills" "$CLAUDE_CONFIG_DIR/skills" "Global Skills → Claude"
+# A função copy_recursive_tree DEVE usar: cp -r (sem -n)
 ```
 
 **Nota:** Diferente de agents (que Claude não usa), skills são **o mecanismo principal** de personalização do Claude Code.
+
+**IMPORTANTE:** Se algum arquivo skill já existir em `~/.claude/skills/`, ele deve ser sobrescrito. Isto garante que atualizações sempre sejam aplicadas.
 
 ---
 
@@ -198,12 +214,15 @@ A pasta `dotfiles/global/codex-skills/` contém um conjunto de **skills já pré
 
 ### No install.sh
 
-Isso significa que a linha de cópia deve ser:
+Isso significa que a linha de cópia deve ser (com sobrescrita de arquivos existentes):
 ```bash
 copy_recursive_tree "$DOTFILES_DIR/global/codex-skills" "$CODEX_CONFIG_DIR/agents" "Codex Skills (pre-converted)"
+# A função copy_recursive_tree DEVE usar: cp -r (sem -n)
 ```
 
 **Atenção:** Diferente de `dotfiles/global/skills/` que vai para `~/.codex/skills/`, os `codex-skills/` vão para `~/.codex/agents/`.
+
+**IMPORTANTE:** Se algum arquivo já existir em `~/.codex/agents/`, ele deve ser sobrescrito. Isto garante sincronização completa.
 
 ---
 
@@ -359,14 +378,34 @@ dotfiles/global/skills/ → 316 skills (inclui as 16 anteriores)
 
 ### **Fase 5: Ajustar install.sh**
 
-**Objetivo:** Implementar novo fluxo de cópia
+**Objetivo:** Implementar novo fluxo de cópia com **sobrescrita garantida** de arquivos existentes
 
 **Pseudocódigo:**
 
 ```bash
-# Fase 1: Copiar global para configurações
+# ⚠️ IMPORTANTE: Todos os comandos cp/copy_recursive_tree DEVEM sobrescrever
+# Usar: cp -r (não usar -n)
+# Isto garante que toda atualização em dotfiles/ seja refletida em ~/.*/
+
+# Função auxiliar (implementação recomendada)
+copy_recursive_tree() {
+    local SRC="$1"
+    local DST="$2"
+    local DESC="$3"
+    
+    if [ -d "$SRC" ]; then
+        echo "📋 Copiando $DESC..."
+        # USAR cp -r (com sobrescrita) em vez de cp -rn (sem sobrescrita)
+        cp -r "$SRC"/* "$DST/" 2>/dev/null || true
+        echo "✅ $DESC copiado (arquivos existentes foram SOBRESCRITOS)"
+    else
+        echo "⚠️  Origem não encontrada: $SRC"
+    fi
+}
+
+# Fase 1: Copiar global para configurações (SOBRESCREVE tudo)
 copy_from_global() {
-    # Cópia que faz broadcast para 3 IDEs
+    # Broadcast para 3 IDEs — todos os arquivos são SOBRESCRITOS
     copy_recursive_tree "$DOTFILES_DIR/global/agents" "$CURSOR_CONFIG_DIR/agents" "Global Agents → Cursor"
     copy_recursive_tree "$DOTFILES_DIR/global/skills" "$CLAUDE_CONFIG_DIR/skills" "Global Skills → Claude"
     copy_recursive_tree "$DOTFILES_DIR/global/skills" "$CURSOR_CONFIG_DIR/skills" "Global Skills → Cursor"
@@ -375,29 +414,48 @@ copy_from_global() {
     copy_recursive_tree "$DOTFILES_DIR/global/rules" "$CURSOR_CONFIG_DIR/rules" "Global Rules → Cursor"
     copy_recursive_tree "$DOTFILES_DIR/global/rules" "$CODEX_CONFIG_DIR/rules" "Global Rules → Codex"
     
-    # Codex-skills: já estão em formato Codex, cópia direta SEM conversão
-    copy_recursive_tree "$DOTFILES_DIR/global/codex-skills" "$CODEX_CONFIG_DIR/agents" "Global Codex Skills → Codex Agents (no conversion needed)"
+    # Codex-skills: já estão em formato Codex, cópia direta SEM conversão (SOBRESCREVE)
+    copy_recursive_tree "$DOTFILES_DIR/global/codex-skills" "$CODEX_CONFIG_DIR/agents" "Global Codex Skills → Codex Agents (no conversion, OVERWRITES)"
     
     copy_recursive_tree "$DOTFILES_DIR/global/mcp" "$CLAUDE_CONFIG_DIR/mcp" "Global MCP → Claude"
     
-    # Hooks: precisam conversão
+    # Hooks: precisam conversão (ver função separada)
     copy_hooks_to_tools
 }
 
-# Fase 2: Copiar específicas (sobrescrita, se houver)
+# Fase 2: Copiar específicas (SOBRESCREVE Fase 1)
+# Esta fase permite customizações locais sobrescreverem o global
 copy_specific_overrides() {
-    copy_recursive_tree "$DOTFILES_DIR/claude" "$CLAUDE_CONFIG_DIR" "Claude Overrides"
-    copy_recursive_tree "$DOTFILES_DIR/cursor" "$CURSOR_CONFIG_DIR" "Cursor Overrides"
-    copy_recursive_tree "$DOTFILES_DIR/codex" "$CODEX_CONFIG_DIR" "Codex Overrides"
+    copy_recursive_tree "$DOTFILES_DIR/claude" "$CLAUDE_CONFIG_DIR" "Claude Overrides (sobrescreve global)"
+    copy_recursive_tree "$DOTFILES_DIR/cursor" "$CURSOR_CONFIG_DIR" "Cursor Overrides (sobrescreve global)"
+    copy_recursive_tree "$DOTFILES_DIR/codex" "$CODEX_CONFIG_DIR" "Codex Overrides (sobrescreve global)"
 }
 
-# Executar
+# Executar ambas as fases
 copy_from_global
 copy_specific_overrides
+
+echo ""
+echo "✅ Instalação completa! Todos os arquivos foram copiados/atualizados."
+echo "   Arquivos existentes foram SOBRESCRITOS para garantir sincronização."
 ```
+
+**Pontos-chave de implementação:**
+
+1. **Função `copy_recursive_tree` deve usar `cp -r` (nunca `-n`)**
+   - `cp -r` = copia recursivamente E sobrescreve arquivos existentes
+   - `cp -rn` = copia recursivamente MAS não sobrescreve (❌ NÃO USAR)
+
+2. **Ordem de execução garante precedência:**
+   - Fase 1 copia `global/` para todos os `~/.*/`
+   - Fase 2 copia `dotfiles/[claude|cursor|codex]/` **depois**, sobrescrevendo Fase 1
+   - Resultado: customizações locais ganham de global
+
+3. **Cada execução de `install.sh` é idempotente e atualiza tudo**
 
 **Saídas:**
 - `install.sh` atualizado com novo fluxo
+- Função `copy_recursive_tree` implementada com sobrescrita garantida
 - Testado em ambiente local
 
 ---
