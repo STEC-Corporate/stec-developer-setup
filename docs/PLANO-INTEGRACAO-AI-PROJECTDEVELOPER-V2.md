@@ -125,26 +125,29 @@ Resultado Final: Recursos globais + customizações locais
 
 ⭐ A pasta `global/codex-skills/` é um **conjunto de skills pré-convertidas especificamente para Codex**. Diferente das skills genéricas em `global/skills/`, os arquivos em `codex-skills/` já estão no formato esperado pelo Codex e devem ser copiados **diretamente** para `~/.codex/agents/` **sem conversão adicional**. Esta é uma migração direta: `global/codex-skills/* → ~/.codex/agents/`.
 
-### Regra de Conversão (Se Necessário)
+### Roteamento e Conversão de Recursos
 
-Se um recurso for **formatado diferentemente** para cada IDE, deve ser transcrito conforme esperado:
+**Recursos que NÃO precisam conversão** (cópia direta):
 
-**Exemplo:**
+1. **Skills** (`global/skills/*/SKILL.md`) — Formato Markdown unificado
+   - → Para Claude: Copiar como-é em `~/.claude/skills/`
+   - → Para Cursor: Copiar como-é em `~/.cursor/skills/`
+   - → Para Codex: Copiar como-é em `~/.codex/skills/`
+   - ✅ Formato nativo para todos
 
-1. **Skills** (`global/skills/*/SKILL.md`) — Formato unificado, usado por TODOS
-   - → Para Claude: Copiar como-é em `~/.claude/skills/` (Skills em Markdown)
-   - → Para Cursor: Copiar como-é em `~/.cursor/skills/` (Skills em Markdown)
-   - → Para Codex: Copiar como-é em `~/.codex/skills/` (Skills em Markdown)
-
-2. **Agents** (`global/agents/*.md`) — Formato Markdown+YAML, usado por Cursor e Codex
+2. **Agents** (`global/agents/*.md`) — Formato Markdown+YAML
    - → Para Claude: Ignorar (não utiliza agents)
    - → Para Cursor: Copiar como-é em `~/.cursor/agents/`
    - → Para Codex: Copiar como-é em `~/.codex/agents/`
+   - ✅ Formato nativo para Cursor e Codex
 
-3. **Hooks** (`global/hooks/`) — Formato JSON, requer conversão
+**Recursos que REQUEREM conversão** (transformação necessária):
+
+3. **Hooks** (`global/hooks/`) — Formato JSON, mapeamento diferente por IDE
    - → Para Claude: Converter para MCP server config em `~/.claude/mcp/`
    - → Para Cursor: Copiar como `hooks.json` em `~/.cursor/hooks.json`
    - → Para Codex: Converter para `.rules` DSL em `~/.codex/rules/`
+   - 🔄 Requer transformação de formato
 
 ---
 
