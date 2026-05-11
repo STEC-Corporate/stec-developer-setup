@@ -8,8 +8,8 @@ Documentação completa sobre onde cada ferramenta (Claude Code, Cursor IDE, Cod
 
 | Categoria | Claude Code | Cursor IDE | Codex CLI |
 |-----------|-------------|------------|-----------|
-| **Skills Global** | `~/.claude/skills/` | `~/.cursor/extensions/` | `~/.codex/skills/` |
-| **Skills Local** | `.claude/skills/` | `.cursor/` | `.codex/skills/` |
+| **Skills Global** | `~/.claude/skills/` | `~/.cursor/skills/` | `~/.codex/skills/` |
+| **Skills Local** | `.claude/skills/` | `.cursor/skills/` | `.codex/skills/` |
 | **Agents Global** | `CLAUDE.md` (home) | Não usa | `~/.codex/AGENTS.md` |
 | **Agents Local** | `CLAUDE.md` (projeto) | `.cursorrules` | `.codex/AGENTS.md` |
 | **Hooks Global** | Integração MCP | `~/.cursor/hooks.json` | `~/.codex/rules/` |
@@ -289,61 +289,136 @@ Não há comando de invocação explícita como com skills.
 
 ## 🔵 CURSOR IDE
 
-### 1️⃣ Skills (Extensões Personalizadas)
+### 1️⃣ Skills (Agent Skills — Habilidades Reutilizáveis)
+
+Cursor IDE suporta **Agent Skills** — um padrão aberto para packaging de conhecimento reutilizável e scripts que estendem o Agent com capacidades especializadas.
 
 #### Localização Global
 ```
-~/.cursor/extensions/
-├── extension-1/
-│   ├── package.json
-│   ├── extension.js
-│   └── ...
-├── extension-2/
-│   └── ...
+~/.cursor/skills/
+├── skill-name-1/
+│   ├── SKILL.md
+│   └── [scripts/arquivos auxiliares]
+├── skill-name-2/
+│   └── SKILL.md
 └── ...
 ```
 
-**Localização:** `~/.cursor/extensions/{extension-name}/`
+**Localização:** `~/.cursor/skills/{skill-name}/SKILL.md`
 
 **Formato:**
-- Tipo: Extensões VS Code compatíveis
-- Estrutura: `package.json` + código JavaScript/TypeScript
-- Não usa SKILL.md como Claude Code
+- Extensão: `.md` (Markdown)
+- Frontmatter: YAML (obrigatório, como Claude Code)
+- Conteúdo: Markdown + instruções + scripts
+- Padrão: Open standard (compatível com agents.md)
+
+**Estrutura de Arquivo:**
+```markdown
+---
+name: Skill Display Name
+description: Uma breve descrição da skill
+category: code|documentation|debug
+---
+
+# Skill Name
+
+Descrição detalhada da skill e seu uso.
+
+## Usage Examples
+- Como usar a skill
+- Casos de uso
+
+## Scripts
+Scripts auxiliares que a skill pode executar.
+```
+
+**Exemplo Prático:**
+```yaml
+---
+name: Database Schema Analyzer
+description: Analisa e documenta schema de banco de dados
+category: debug
+---
+
+# Database Schema Analyzer
+
+Conecta ao banco e gera documentação automática do schema.
+
+## Casos de Uso
+- Documentar novas tabelas
+- Validar migrations
+- Gerar diagramas ER
+
+## Executar
+Usar `/database-analyzer` no Agent.
+```
 
 #### Localização Local (Projeto)
 ```
 projeto/
 ├── .cursor/
-│   ├── extension-1.md
-│   ├── extension-2.md
-│   └── ...
+│   └── skills/
+│       ├── custom-skill-1/
+│       │   ├── SKILL.md
+│       │   └── scripts/analyzer.js
+│       └── custom-skill-2/
+│           └── SKILL.md
 └── ...
 ```
 
-**Localização:** `projeto/.cursor/{arquivo}.md`
-
-**Formato:**
-- Extensão: `.md` (Markdown)
-- Sem frontmatter obrigatório
-- Instruções em Markdown livre
+**Localização:** `projeto/.cursor/skills/{skill-name}/SKILL.md`
 
 #### Precedência de Carregamento
-1. Extensões locais (`.cursor/*.md`)
-2. Extensões globais (`~/.cursor/extensions/`)
-3. Extensões padrão do Cursor
+1. Skills do projeto local (`.cursor/skills/`)
+2. Skills globais do usuário (`~/.cursor/skills/`)
+3. Skills padrão do Cursor
 
 #### Invocação
-Através de menu contextual ou comandos paleta.
+Skills são carregadas dinamicamente pelo Agent quando relevantes.
+
+**Invocação Explícita:**
+```
+/skill-name              # Via slash command no Agent
+Ctrl+Shift+P             # Paleta de comandos
+```
 
 **Exemplo:**
 ```
-Ctrl+Shift+P → Cursor: Run Extension
+/database-analyzer       # Dispara a skill de análise
 ```
 
-#### Diferença Principal do Claude Code
-- Cursor usa **extensões VS Code**, não SKILL.md
-- Suporta JavaScript/TypeScript nativamente
-- Pode acessar API do VS Code
+#### Dynamic Loading
+Diferente de Rules (sempre incluídas), **Skills são carregadas apenas quando o Agent as considera relevantes**, mantendo a context window limpa.
+
+#### Cursor SDK (Programmatic)
+Para agentes programáticos, usar:
+
+```typescript
+import { CursorSDK } from '@cursor/sdk';
+
+const agent = new CursorSDK.Agent({
+  skills: [
+    'database-analyzer',
+    'git-helper',
+    'api-tester'
+  ]
+});
+```
+
+**Instalação:**
+```bash
+npm install @cursor/sdk
+```
+
+#### Comparação com Claude Code
+| Aspecto | Claude Code | Cursor IDE |
+|---------|-------------|------------|
+| Localização | `~/.claude/skills/` | `~/.cursor/skills/` |
+| Formato | SKILL.md | SKILL.md |
+| Invocação | `/skill-name` | `/skill-name` |
+| Carregamento | Sempre disponível | Dinâmico (intelligently) |
+| SDK | Nativo | @cursor/sdk |
+| Padrão | Anthropic | Open Standard (agents.md) |
 
 ---
 
@@ -1178,10 +1253,10 @@ readonly = true
 
 | Aspecto | Claude Code | Cursor IDE | Codex CLI |
 |---------|-------------|------------|-----------|
-| **Skills Global** | `~/.claude/skills/` | `~/.cursor/extensions/` | `~/.codex/skills/` |
-| **Skills Local** | `.claude/skills/` | `.cursor/` | `.codex/skills/` |
-| **Skills Formato** | SKILL.md (YAML+MD) | Extensões JS/TS | SKILL.md (YAML+MD) |
-| **Skills Invocação** | `/skill-name` | UI/Paleta | `$skill-name` |
+| **Skills Global** | `~/.claude/skills/` | `~/.cursor/skills/` | `~/.codex/skills/` |
+| **Skills Local** | `.claude/skills/` | `.cursor/skills/` | `.codex/skills/` |
+| **Skills Formato** | SKILL.md (YAML+MD) | SKILL.md (YAML+MD) | SKILL.md (YAML+MD) |
+| **Skills Invocação** | `/skill-name` | `/skill-name` | `$skill-name` |
 | **Agents Global** | `~/.CLAUDE.md` | N/A | `~/.codex/AGENTS.md` |
 | **Agents Local** | `CLAUDE.md` | `.cursorrules` | `.codex/AGENTS.md` |
 | **Agents Formato** | Markdown livre | Texto livre | Markdown estruturado |
@@ -1259,23 +1334,28 @@ icon: ✅
 Executa suite completa de testes com cobertura.
 ```
 
-**Para Cursor (`.cursor/test-runner.md`):**
+**Para Cursor (`.cursor/skills/test-runner/SKILL.md`):**
 ```markdown
-# Test Runner
+---
+name: Run Tests
+description: Executa testes do projeto
+category: code
+---
 
-Executa suite completa de testes com cobertura.
+# Run Tests
 
-## Configuração
+Executa suite completa de testes com cobertura automática.
 
-Adicione em `.vscode/tasks.json`:
+## Uso
 
-\`\`\`json
-{
-  "label": "Run Tests",
-  "type": "shell",
-  "command": "npm",
-  "args": ["test"]
-}
+Invoque via Agent:
+\`\`\`
+/run-tests
+\`\`\`
+
+Ou manualmente:
+\`\`\`bash
+npm test
 \`\`\`
 ```
 
@@ -1315,8 +1395,11 @@ Executáveis:
 ### Cursor
 - ❌ Não suporta CLAUDE.md global (use User Rules em settings)
 - ❌ `.cursorrules` é arquivo sem extensão e deprecated
-- ❌ Extensões globais não são recarregadas automaticamente
+- ❌ Nightly release: Agent Skills requerem nightly channel (beta)
 - ❌ Rules só aplicam ao Agent, não Cursor Tab ou Inline Edit
+- ✅ Skills usam padrão aberto SKILL.md (compatível com Claude Code)
+- ✅ Skills são carregadas dinamicamente (economiza context window)
+- ✅ Suporta @cursor/sdk para agentes programáticos
 - ✅ Suporta hooks.json para interceptar MCP
 - ✅ Suporta Automations para agentes schedulados (cloud)
 - ✅ Suporta todo ecossistema VS Code
@@ -1349,6 +1432,7 @@ Executáveis:
 
 | Data | Versão | Alterações |
 |------|--------|-----------|
+| 2026-05-10 | 1.2 | 🔧 CORRIGIDO: Cursor IDE Skills — agora usa SKILL.md (padrão aberto) ao invés de extensões VS Code; Adicionado @cursor/sdk; Esclarecido carregamento dinâmico vs Rules; Atualizado índice e tabela comparativa |
 | 2026-05-10 | 1.1 | Adicionado Rules para Cursor IDE, Claude Code e Codex CLI; Corrigido suporte a Hooks do Cursor; Tabela comparativa expandida |
 | 2026-05-10 | 1.0 | Documento inicial criado com mapeamento completo das 3 ferramentas |
 
