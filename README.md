@@ -158,6 +158,210 @@ Padrão: instala em `~/.claude/`, `~/.cursor/`, `~/.codex/` (home do Git Bash)
 
 ---
 
+## 🎓 Tutorial: Onboarding para Novo Developer
+
+Este é um guia passo-a-passo para um novo developer configurar um projeto STEC pela primeira vez.
+
+### ⏱️ Tempo estimado: 15 minutos
+
+### 📋 Pré-requisitos (Check-in)
+
+Antes de começar, verifique se você tem:
+
+```bash
+# 1. Git instalado
+git --version
+# Output esperado: git version 2.x.x
+
+# 2. Node.js (se for projeto Node/TypeScript)
+node --version
+npm --version
+
+# 3. Python 3 (se for projeto Python)
+python3 --version
+
+# 4. Java JDK (se for projeto Java)
+java -version
+```
+
+Se algo estiver faltando, passe para o seu Tech Lead para instalação.
+
+---
+
+### 🚀 Passo 1: Clonar o Projeto (2 min)
+
+```bash
+# Substituir <repo-url> com a URL real do repositório
+git clone <repo-url>
+cd seu-projeto
+
+# Verificar que é um repositório Git real
+ls -la | grep ".git"
+```
+
+**Esperado:** Você vê `.git/` e outros arquivos/pastas do projeto.
+
+---
+
+### ⚙️ Passo 2: Executar o Bootstrap Automático (5 min)
+
+```bash
+bash scripts/init.sh
+```
+
+Este script faz **automaticamente**:
+- ✅ Detecta a plataforma (Linux, Windows, WSL2, macOS)
+- ✅ Gera `.env.local` com seus paths pessoais
+- ✅ Instala dependências (npm, pip, Maven, etc.)
+- ✅ Gera tipos (Prisma, TypeScript, etc.)
+- ✅ Verifica scripts disponíveis (build, test, lint)
+
+**Esperado:** Verá saída verde com checkmarks ✅
+
+```
+🚀 Inicializando projeto Node.js em /home/seu-usuario/Projetos/seu-projeto
+✅ Node.js instalado: v18.16.0
+✅ npm instalado: 9.6.7
+📦 Usando: npm
+...
+✨ Ambiente Node.js configurado!
+```
+
+---
+
+### 🔍 Passo 3: Verificar que Tudo Funciona (3 min)
+
+```bash
+# 1. Verificar que .env.local foi criado com seus paths
+cat .env.local
+```
+
+**Esperado:** Arquivo com variáveis como:
+```bash
+PLATFORM=wsl2
+PROJECT_ROOT=/home/seu-usuario/Projetos/seu-projeto
+USER_NAME=seu-usuario
+CLAUDE_CONFIG_DIR=/home/seu-usuario/.claude
+```
+
+```bash
+# 2. Rodar um teste rápido
+npm test    # (ou yarn test / pnpm test / python -m pytest / mvn test)
+```
+
+**Esperado:** Testes passando ou informação clara de quais falharam (normal em setup inicial).
+
+```bash
+# 3. Verificar linting/type-checking
+npm run lint     # (se existir)
+npm run typecheck # (se existir)
+```
+
+---
+
+### 📖 Passo 4: Ler o Contexto do Projeto (2 min)
+
+```bash
+# Entender para quem você está desenvolvendo
+cat CLAUDE.md
+```
+
+Este arquivo explica:
+- 🎯 Objetivo do projeto
+- 📋 Stack técnico
+- 👥 Quem você está ajudando
+- 🚫 O que NÃO fazer
+- ✅ Como trabalhar aqui
+
+```bash
+# (Opcional) Ver o progresso atual
+cat progress.md
+```
+
+---
+
+### ✅ Passo 5: Fazer seu Primeiro Commit (2 min)
+
+Se o harness foi aplicado automaticamente, você verá arquivo(s) novos como `.env.local`, `progress.md`, etc.
+
+```bash
+# Ver o que mudou
+git status
+
+# Adicionar arquivo(s) de configuração pessoal
+git add .env.local    # (já está em .gitignore, safe)
+git add progress.md   # (se criado)
+
+# Commit
+git commit -m "setup: configurar ambiente local"
+
+# Ver log
+git log --oneline -3
+```
+
+---
+
+### 🎯 Passo 6: Próximos Passos — Começar a Trabalhar
+
+#### Se você é novo no projeto:
+```bash
+# 1. Encontrar a primeira tarefa
+cat CLAUDE.md  # (leia a seção de "Próximos passos")
+
+# 2. Criar um branch
+git checkout -b feature/sua-feature
+
+# 3. Fazer uma pequena mudança e testar
+npm test
+git add .
+git commit -m "feat: descrição breve"
+git push origin feature/sua-feature
+```
+
+#### Se você tem uma ideia/bug to fix:
+```bash
+# 1. Registrar no TaskLink (obrigatório)
+tasklink idea create \
+  --title "Minha ideia" \
+  --problem "O problema que resolve" \
+  --hypothesis "Por que vai funcionar" \
+  --profile "Quem vai usar"
+
+# 2. Criar feature branch
+git checkout -b fix/seu-fix
+
+# 3. Fazer mudanças + tests + commit
+# 4. Push and PR
+```
+
+---
+
+### 🐛 Troubleshooting Rápido
+
+| Problema | Solução |
+|----------|---------|
+| `.env.local` não foi criado | Rodar novamente: `bash scripts/init.sh` |
+| `scripts/init.sh` não encontrado | Verificar que você está na raiz do projeto (`pwd`) |
+| Node/Python/Java não encontrado | Instalar via `brew`, `apt`, `choco`, etc. Pedir ajuda ao Tech Lead |
+| Teste falha | Normal em setup inicial. Ver error. Pedir ajuda no Slack #dev-support |
+| Git permission denied | Configurar SSH keys: `ssh-keygen -t ed25519` |
+
+---
+
+### ✨ Pronto!
+
+Você agora tem:
+- ✅ Projeto clonado
+- ✅ Ambiente configurado (`.env.local` com seus paths)
+- ✅ Dependências instaladas
+- ✅ Testes passando (ou informado qual está quebrando)
+- ✅ Contexto do projeto claro (CLAUDE.md)
+- ✅ Pronto para contribuir
+
+**Próxima ação:** Comece a trabalhar! Siga o CLAUDE.md do projeto.
+
+---
+
 ## 🔄 Como atualizar e validar
 
 O harness evolui. Para manter sincronizado e validar:
