@@ -3,7 +3,8 @@
 **Projeto:** stec-developer-setup  
 **Objetivo:** Centralizar catálogo corporativo em `dotfiles/global/`, remover submodule `.cursor`  
 **Data Início:** 2026-05-11  
-**Status Geral:** 🟡 **Em Preparação** (Fase 1)
+**Status Geral:** 🟡 **Em Progresso** (Fase 1 → 2)
+**Progresso:** TODO-1 ✅ Completo | TODO-2-6 ⏳ Pendentes
 
 ---
 
@@ -28,15 +29,26 @@
 #### TODO-1: Inventariar AI-ProjectDeveloper
 - **Descrição:** Catalogar estrutura completa do AI-ProjectDeveloper e validar contagem de arquivos
 - **Atividades:**
-  - [ ] Exportar/clonar AI-ProjectDeveloper em local temporário
-  - [ ] Validar quantidade real de agents (esperado: ~77)
-  - [ ] Validar quantidade real de skills (esperado: ~316)
-  - [ ] Mapear dependências internas (skills que referenciam agents)
-  - [ ] Documentar tamanho total
-  - [ ] Criar checklist final de arquivos para migração
+  - [x] Exportar/clonar AI-ProjectDeveloper em local temporário ✅ (submodule em `.cursor/`)
+  - [x] Validar quantidade real de agents (encontrado: **230** em vez de ~77) ✅
+  - [x] Validar quantidade real de skills (confirmado: **316**) ✅
+  - [x] Mapear dependências internas (mínimo 9 skills referenciam agents) ✅
+  - [x] Documentar tamanho total (**7.6M**, 779+ artefatos) ✅
+  - [x] Criar checklist final de arquivos para migração (23 itens) ✅
 - **Bloqueante:** Não
 - **Estimado:** 2-3 horas
-- **Status:** ⏳ **Pending**
+- **Status:** ✅ **Completo** (duração real: ~45 min)
+- **Documento:** `@docs/TODO-1-INVENTARIO-AI-PROJECTDEVELOPER.md`
+
+**Descobertas:**
+- 230 subagents em `agents/` (não 77)
+- 316 skills em `skills/` (conforme esperado)
+- 93 rules em `rules/`
+- 3 codex-skills em `codex-skills/`
+- 42 plans em `plans/`
+- 163 arquivos de docs
+- Estrutura: pastas + `SKILL.md` para skills; arquivos `.md` para agents; `.mdc` para rules
+- 315/316 skills possuem arquivo `SKILL.md` (1 pasta vazia?)
 
 ---
 
@@ -162,10 +174,12 @@
 
 | Métrica | Status |
 |---------|--------|
-| **TODOs Pendentes** | 6/6 (100%) ⏳ |
-| **TODOs Bloqueados** | 1 (TODO-6 aguarda TODO-5, etc.) |
+| **TODOs Completos** | 1/6 ✅ (TODO-1) |
+| **TODOs Pendentes** | 5/6 ⏳ |
+| **TODOs Bloqueados** | 0 |
 | **Decisões Arquiteturais Fechadas** | 4/4 ✅ |
-| **Estimado Total** | 18-24 horas de trabalho |
+| **Estimado Restante** | 17-23 horas de trabalho |
+| **Tempo Real (TODO-1)** | 45 min (vs. 2-3 horas estimado) ⚡ |
 
 ---
 

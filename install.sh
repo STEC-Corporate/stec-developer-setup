@@ -52,8 +52,9 @@ copy_recursive_tree() {
         fi
     done < <(find "$SOURCE_DIR" -type f -print0)
 
-    # chmod +x em todos os .sh dentro de scripts/
+    # chmod +x em todos os .sh dentro de scripts/ e hooks/
     find "$DEST_DIR" -path "*/scripts/*.sh" -type f -exec chmod +x {} \; 2>/dev/null || true
+    find "$DEST_DIR" -path "*/hooks/*.sh" -type f -exec chmod +x {} \; 2>/dev/null || true
 
     echo "  📊 $COPIED novo(s), $SKIPPED já existente(s) preservado(s)"
     echo "  ✅ $TOOL_NAME OK"

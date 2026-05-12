@@ -1,24 +1,54 @@
 {
   "version": 1,
   "hooks": {
-    "beforeShellExecution": [
+    "sessionStart": [
       {
-        "command": "bash ~/.cursor/scripts/guard-shell.sh",
-        "timeout": 5000,
-        "description": "Bloqueia comandos destrutivos (rm -rf /, git push --force, DROP TABLE, mkfs)"
+        "command": "bash ~/.cursor/hooks/cursor-hooks-dispatch.sh sessionStart",
+        "description": "Contexto STEC (premissa submodule) quando o projeto tiver rules/submodule-premise.mdc em .cursor"
       }
     ],
     "afterFileEdit": [
       {
+        "command": "bash ~/.cursor/hooks/cursor-hooks-dispatch.sh afterFileEdit",
+        "description": "Lembretes DDD/docs ao editar dominio/SKILL/agent/planos sob docs/"
+      },
+      {
         "command": "bash ~/.cursor/scripts/progress-update.sh",
         "async": true,
-        "description": "Atualiza progress.md automaticamente após edições em projetos com harness"
+        "description": "Atualiza progress.md após edições em projetos com harness"
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "command": "bash ~/.cursor/hooks/cursor-hooks-dispatch.sh beforeShellExecution",
+        "description": "Bloqueia comandos destrutivos e push direto para main/master (substitui guard-shell legado neste fluxo STEC)"
+      }
+    ],
+    "preToolUse": [
+      {
+        "command": "bash ~/.cursor/hooks/cursor-hooks-dispatch.sh preToolUse",
+        "matcher": "(?i)^(Write|StrReplace|ApplyPatch|EditNotebook|search_replace|apply_patch)$",
+        "timeout": 5,
+        "failClosed": false,
+        "description": "TaskLink apenas em escritas — evita abrir o hook antes de cada Read/Grep"
       }
     ],
     "stop": [
       {
         "command": "bash ~/.cursor/scripts/checklist.sh",
-        "description": "Exibe checklist de fim de sessão (progress.md, commit, push)"
+        "description": "Checklist harness (progress.md, commit, push)"
+      },
+      {
+        "command": "bash ~/.cursor/hooks/on-stop.sh",
+        "description": "Opcional CURSOR_HOOK_STOP_CMD — ver ~/.cursor/hooks/README.md"
+      }
+    ],
+    "beforeSubmitPrompt": [
+      {
+        "command": "bash ~/.cursor/hooks/plan-brief-before-submit.sh",
+        "timeout": 5,
+        "failClosed": false,
+        "description": "Gate plano/brainstorm/prompt — PLAN_BRIEF_GATE em ~/.cursor/hooks/local.env"
       }
     ]
   }
