@@ -89,25 +89,27 @@ if [[ "$INSTALL_WSL" == "1" ]]; then
     echo "📋 FASE 1: Distribuindo catálogo corporativo (dotfiles/global/)"
     echo ""
 
-    # Claude Code — skills + rules + mcp + scripts + docs (NÃO agents — ignorado por Claude)
-    echo "🔹 Claude Code (skills, rules, mcp, scripts)"
+    # Claude Code — skills + rules + mcp + scripts + docs/llm (NÃO agents — ignorado por Claude)
+    echo "🔹 Claude Code (skills, rules, mcp, scripts, docs/llm)"
     copy_tree "$DOTFILES_DIR/global/skills" "$CLAUDE_CONFIG_DIR/skills" "Claude skills" 0
     copy_tree "$DOTFILES_DIR/global/rules" "$CLAUDE_CONFIG_DIR/rules" "Claude rules" 0
     copy_tree "$DOTFILES_DIR/global/mcp" "$CLAUDE_CONFIG_DIR/mcp" "Claude mcp" 0
     copy_tree "$DOTFILES_DIR/global/scripts" "$CLAUDE_CONFIG_DIR/scripts" "Claude scripts" 0
+    copy_tree "$DOTFILES_DIR/global/docs/llm" "$CLAUDE_CONFIG_DIR/docs/llm" "Claude docs/llm" 0
     echo ""
 
-    # Cursor IDE — skills + rules + agents + hooks + scripts
-    echo "🔹 Cursor IDE (skills, rules, agents, hooks, scripts)"
+    # Cursor IDE — skills + rules + agents + hooks + scripts + docs/llm
+    echo "🔹 Cursor IDE (skills, rules, agents, hooks, scripts, docs/llm)"
     copy_tree "$DOTFILES_DIR/global/skills" "$CURSOR_CONFIG_DIR/skills" "Cursor skills" 0
     copy_tree "$DOTFILES_DIR/global/rules" "$CURSOR_CONFIG_DIR/rules" "Cursor rules" 0
     copy_tree "$DOTFILES_DIR/global/agents" "$CURSOR_CONFIG_DIR/agents" "Cursor agents" 0
     copy_tree "$DOTFILES_DIR/global/hooks" "$CURSOR_CONFIG_DIR/hooks" "Cursor hooks" 0
     copy_tree "$DOTFILES_DIR/global/scripts" "$CURSOR_CONFIG_DIR/scripts" "Cursor scripts" 0
+    copy_tree "$DOTFILES_DIR/global/docs/llm" "$CURSOR_CONFIG_DIR/docs/llm" "Cursor docs/llm" 0
     echo ""
 
-    # Codex CLI — skills (genéricas + específicas), rules, agents, scripts
-    echo "🔹 Codex CLI (skills genéricas → skills Codex-específicas, rules, agents, scripts)"
+    # Codex CLI — skills (genéricas + específicas), rules, agents, scripts + docs/llm
+    echo "🔹 Codex CLI (skills genéricas → skills Codex-específicas, rules, agents, scripts, docs/llm)"
     copy_tree "$DOTFILES_DIR/global/skills" "$CODEX_CONFIG_DIR/skills" "Codex skills" 0
     # Codex-specific skills (sobrescreve genéricas se conflito)
     if [ -d "$DOTFILES_DIR/global/codex/skills" ]; then
@@ -116,6 +118,7 @@ if [[ "$INSTALL_WSL" == "1" ]]; then
     copy_tree "$DOTFILES_DIR/global/rules" "$CODEX_CONFIG_DIR/rules" "Codex rules" 0
     copy_tree "$DOTFILES_DIR/global/agents" "$CODEX_CONFIG_DIR/agents" "Codex agents" 0
     copy_tree "$DOTFILES_DIR/global/scripts" "$CODEX_CONFIG_DIR/scripts" "Codex scripts" 0
+    copy_tree "$DOTFILES_DIR/global/docs/llm" "$CODEX_CONFIG_DIR/docs/llm" "Codex docs/llm" 0
     echo ""
 
     echo "✅ Fase 1 concluída"

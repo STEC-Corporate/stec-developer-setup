@@ -1,0 +1,155 @@
+version: "1.0"
+updated: "2026-05-12"
+total_domains: 25
+advisor_hook: "~/.claude/hooks/llm-advisor.sh"
+
+domains:
+  - name: fintech
+    file: by-domain/fintech.md
+    complexity: high
+    primary_claude: claude-opus-4-7
+    keywords: [fintech, bolsa, investimento, compliance financeiro, B3, derivativo, carteira]
+
+  - name: legal-compliance
+    file: by-domain/legal-compliance.md
+    complexity: high
+    primary_claude: claude-opus-4-7
+    keywords: [LGPD, GDPR, contrato, regulação, auditoria jurídica, compliance, lei]
+
+  - name: architecture
+    file: by-domain/architecture.md
+    complexity: high
+    primary_claude: claude-opus-4-7
+    keywords: [arquitetura, microsserviço, DDD, CQRS, escalabilidade, design pattern, bounded context, event sourcing]
+
+  - name: security
+    file: by-domain/security.md
+    complexity: high
+    primary_claude: claude-opus-4-7
+    keywords: [vuln, OWASP, auth, XSS, injection, segurança, pentest, CVE, exploit]
+
+  - name: statistics
+    file: by-domain/statistics.md
+    complexity: high
+    primary_claude: claude-sonnet-4-6
+    keywords: [estatística, regressão, ANOVA, inferência, p-valor, distribuição, correlação, hipótese]
+
+  - name: data-science
+    file: by-domain/data-science.md
+    complexity: high
+    primary_claude: claude-sonnet-4-6
+    keywords: [machine learning, dataset, treinamento, sklearn, notebook, modelo ML, feature engineering]
+
+  - name: ai-ml-engineering
+    file: by-domain/ai-ml-engineering.md
+    complexity: high
+    primary_claude: claude-opus-4-7
+    keywords: [LLM, agente, prompt, embedding, RAG, fine-tuning, AI agent, vector, transformer]
+
+  - name: ux-design
+    file: by-domain/ux-design.md
+    complexity: medium
+    primary_claude: claude-opus-4-7
+    keywords: [UX, wireframe, usabilidade, persona, jornada, protótipo, design system, acessibilidade]
+
+  - name: technology-selection
+    file: by-domain/technology-selection.md
+    complexity: medium
+    primary_claude: claude-opus-4-7
+    keywords: [comparar, avaliar, escolher lib, benchmark, trade-off, tecnologia, stack, framework decision]
+
+  - name: performance
+    file: by-domain/performance.md
+    complexity: high
+    primary_claude: claude-sonnet-4-6
+    keywords: [profiling, benchmark, latência, otimização de performance, throughput, bottleneck, memória]
+
+  - name: frontend
+    file: by-domain/frontend.md
+    complexity: medium
+    primary_claude: claude-sonnet-4-6
+    keywords: [React, Vue, CSS, HTML, Tailwind, componente, frontend, SSR, SPA, estado]
+
+  - name: devops
+    file: by-domain/devops.md
+    complexity: medium
+    primary_claude: claude-sonnet-4-6
+    keywords: [Docker, Kubernetes, CI/CD, Terraform, pipeline, deploy, Helm, infra, GitOps]
+
+  - name: database
+    file: by-domain/database.md
+    complexity: medium
+    primary_claude: claude-sonnet-4-6
+    keywords: [SQL, schema, migration, query, índice, sharding, banco de dados, PostgreSQL, MongoDB]
+
+  - name: api-design
+    file: by-domain/api-design.md
+    complexity: medium
+    primary_claude: claude-sonnet-4-6
+    keywords: [REST, GraphQL, OpenAPI, endpoint, versionamento, API, contrato, gateway]
+
+  - name: mobile
+    file: by-domain/mobile.md
+    complexity: medium
+    primary_claude: claude-sonnet-4-6
+    keywords: [iOS, Android, React Native, Flutter, Swift, Kotlin, mobile, app store]
+
+  - name: testing
+    file: by-domain/testing.md
+    complexity: medium
+    primary_claude: claude-sonnet-4-6
+    keywords: [teste, TDD, BDD, cobertura, mock, assert, unit test, integration test, e2e]
+
+  - name: software-development
+    file: by-domain/software-development.md
+    complexity: medium
+    primary_claude: claude-sonnet-4-6
+    keywords: [python, javascript, typescript, java, kotlin, rust, bash, código, função, classe, bug, implementar]
+
+  - name: software-engineering
+    file: by-domain/software-engineering.md
+    complexity: medium
+    primary_claude: claude-sonnet-4-6
+    keywords: [refactor, code review, cobertura, lint, clean code, SOLID, princípios, qualidade]
+
+  - name: product-management
+    file: by-domain/product-management.md
+    complexity: medium
+    primary_claude: claude-sonnet-4-6
+    keywords: [roadmap, user story, spec, requisito, product owner, backlog, OKR, KPI]
+
+  - name: idea-management
+    file: by-domain/idea-management.md
+    complexity: low
+    primary_claude: claude-sonnet-4-6
+    keywords: [ideia, brainstorm, TaskLink, conceito, hipótese, inovação, validação de ideia]
+
+  - name: task-management
+    file: by-domain/task-management.md
+    complexity: low
+    primary_claude: claude-haiku-4-5
+    keywords: [tarefa, sprint, planejamento, prioridade, backlog, agendamento, to-do]
+
+  - name: documentation
+    file: by-domain/documentation.md
+    complexity: low
+    primary_claude: claude-sonnet-4-6
+    keywords: [README, changelog, guia, tutorial, API docs, documentação, wiki]
+
+  - name: language-translation
+    file: by-domain/language-translation.md
+    complexity: low
+    primary_claude: claude-haiku-4-5
+    keywords: [tradução, i18n, localização, idioma, translate, internacionalização]
+
+  - name: content-writing
+    file: by-domain/content-writing.md
+    complexity: low
+    primary_claude: claude-sonnet-4-6
+    keywords: [artigo, blog, copy, marketing, texto, conteúdo, redação, newsletter]
+
+  - name: other-domains
+    file: by-domain/other-domains.md
+    complexity: medium
+    primary_claude: claude-sonnet-4-6
+    keywords: []

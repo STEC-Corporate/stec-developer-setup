@@ -108,18 +108,21 @@ echo ""
 echo "🔹 Claude Code (~/.claude/)"
 check_subdirs "$CLAUDE_CONFIG_DIR/skills" 316  "skills (316 genéricas)"
 check_files   "$CLAUDE_CONFIG_DIR/rules"  93   "rules (93 MDC)"
+check_files   "$CLAUDE_CONFIG_DIR/docs/llm/by-domain" 25 "docs/llm (25 domínios)"
 echo ""
 
 echo "🔹 Cursor IDE (~/.cursor/)"
 check_subdirs "$CURSOR_CONFIG_DIR/skills" 316  "skills (316 genéricas)"
 check_files   "$CURSOR_CONFIG_DIR/agents" 230  "agents (230 + INDEX.md)"
 check_files   "$CURSOR_CONFIG_DIR/rules"  93   "rules (93 MDC)"
+check_files   "$CURSOR_CONFIG_DIR/docs/llm/by-domain" 25 "docs/llm (25 domínios)"
 echo ""
 
 echo "🔹 Codex CLI (~/.codex/)"
 check_subdirs "$CODEX_CONFIG_DIR/skills"  320  "skills (316 genéricas + 4 Codex-específicas)"
 check_files   "$CODEX_CONFIG_DIR/agents"  229  "agents"
 check_files   "$CODEX_CONFIG_DIR/rules"   93   "rules (93 MDC)"
+check_files   "$CODEX_CONFIG_DIR/docs/llm/by-domain" 25 "docs/llm (25 domínios)"
 echo ""
 
 # ─── FASE 2: Overlays IDE-específicos ─────────────────────────────────────────

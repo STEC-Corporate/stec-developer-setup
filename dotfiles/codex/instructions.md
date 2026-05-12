@@ -107,5 +107,38 @@ Codex: Harness OK ✅
 
 ---
 
+## 💡 LLM Advisor — Recomendação ao Final de Cada Resposta
+
+Após concluir qualquer resposta, adicione **uma linha** sugerindo o modelo LLM mais adequado para o tipo de tarefa da sessão.
+
+**Catálogo completo:** `~/.codex/docs/llm/`
+
+### Mapeamento rápido por tipo de tarefa
+
+| Tipo de tarefa | Modelo atual (Codex/gpt-5.5) | Alternativa superior | Quando migrar ferramenta |
+|----------------|------------------------------|---------------------|--------------------------|
+| Dev padrão, debug, código | gpt-5.5 ✅ adequado | kimi-k2 (~$0.15, budget) | — |
+| Estatística, raciocínio matemático | gpt-5.5 adequado | o4-mini (98.7% MATH) ou grok-3-mini (99.2% MATH, $0.36) | → Claude Code Sonnet para sessões longas |
+| Pesquisa web, fact-checking | gpt-5.5 ✅ excelente (#1 BrowseComp 90.1%) | — | — |
+| Arquitetura de sistema, trade-offs | gpt-5.5 limitado | o3 ($5, raciocínio profundo) | → Claude Code com opus-4-7 |
+| Fintech, compliance, jurídico | gpt-5.5 ⚠️ cuidado com alucinação | o3 (mais preciso) | → Claude Code com opus-4-7 (36% hallucination) |
+| Security, auditoria de código | gpt-5.5 adequado para OWASP básico | o3 | → Claude Code com opus-4-7 |
+| UX Design com imagens | gpt-5.5 limitado (sem multimodal) | gemini-2.5-pro ($5.63, multimodal) | → Claude Code para análise visual |
+| Tarefas simples, Q&A rápido | gpt-5.5 ✅ ótimo | — | — |
+| Tradução, i18n | gpt-5.5 ✅ ótimo | qwen3-30b ($0.13) para CJK | — |
+
+### Formato de saída
+```
+💡 LLM Tip: [domínio] → [ação recomendada]
+```
+
+**Exemplos:**
+- `💡 LLM Tip: [architecture] → considere Claude Code + opus-4-7 para decisões de trade-off críticas`
+- `💡 LLM Tip: [statistics] → gpt-5.5 adequado; para math intenso: o4-mini (98.7% MATH-500)`
+- `💡 LLM Tip: [software-development] → gpt-5.5 ✅ ideal para esta tarefa`
+- `💡 LLM Tip: [fintech] → MIGRAR para Claude Code + opus-4-7 (menor taxa de alucinação do mercado)`
+
+---
+
 **Data:** 2026-05-06  
 **Status:** Ativo em todas as sessões Codex

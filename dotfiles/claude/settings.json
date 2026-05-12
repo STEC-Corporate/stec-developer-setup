@@ -41,6 +41,16 @@
         "hooks": [
           {
             "type": "command",
+            "command": "bash ~/.claude/hooks/llm-advisor.sh",
+            "async": true,
+            "statusMessage": "LLM Advisor analisando..."
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
             "command": "printf '{\"systemMessage\":\"✅ Sessao encerrada. Checklist:\\n  - progress.md atualizado?\\n  - TaskLink/sistema registrado?\\n  - Commit feito?\\n  - git push enviado?\\n  - Harness completo?\"}'"
           }
         ]
