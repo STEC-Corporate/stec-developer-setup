@@ -3,8 +3,8 @@
 **Projeto:** stec-developer-setup  
 **Objetivo:** Centralizar catálogo corporativo em `dotfiles/global/`, remover submodule `.cursor`  
 **Data Início:** 2026-05-11  
-**Status Geral:** 🟡 **Em Progresso** (Fase 4 → 5)
-**Progresso:** TODO-1,2,3,4 ✅ Completo | TODO-5,6 ⏳ Pendentes
+**Status Geral:** ✅ **Completo** (Fase 6 concluída — submodule removido)
+**Progresso:** TODO-1,2,3,4,5,6 ✅ Completos | Fase 6 ✅ Concluída
 
 ---
 
@@ -38,7 +38,6 @@
 - **Bloqueante:** Não
 - **Estimado:** 2-3 horas
 - **Status:** ✅ **Completo** (duração real: ~45 min)
-- **Documento:** `@docs/TODO-1-INVENTARIO-AI-PROJECTDEVELOPER.md`
 
 **Descobertas:**
 - 230 subagents em `agents/` (não 77)
@@ -72,7 +71,6 @@
 - **Bloqueante:** Após TODO-1
 - **Estimado:** 4-6 horas
 - **Status:** ✅ **Completo** (duração real: ~5 min)
-- **Documento:** `@docs/TODO-2-MIGRACAO-DOTFILES-GLOBAL.md`
 
 **Descobertas:**
 - 230 agents migrados ✅
@@ -99,7 +97,6 @@
 - **Bloqueante:** Após TODO-2 ✅
 - **Estimado:** 3-4 horas
 - **Status:** ✅ **Completo** (duração real: ~2 min)
-- **Documento:** `@docs/TODO-3-DEDUP-OVERLAYS.md`
 
 #### TODO-4: Transcrições de Formato por IDE
 - **Descrição:** Garantir que recursos específicos de IDE estão no formato correto
@@ -114,7 +111,6 @@
 - **Bloqueante:** Após TODO-3 ✅
 - **Estimado:** 2-3 horas
 - **Status:** ✅ **Completo** (duração real: ~5 min)
-- **Documento:** `@docs/TODO-4-FORMATOS-IDE.md`
 
 ---
 
@@ -173,13 +169,12 @@
 
 #### Fase 6: Remover Git Submodule `.cursor`
 - **Descrição:** Limpar repositório após validação de TODO-6
-- **Timing:** **APÓS TODO-6 estar 100% completo**
 - **Atividades:**
-  - [ ] `git rm --cached .cursor`
-  - [ ] `rm -rf .cursor`
-  - [ ] Remover `.gitmodules` e submodule config
-  - [ ] Commit: `"chore: remove .cursor submodule, migrated to dotfiles/global/"`
-- **Status:** ⏸️ **Bloqueado** (aguarda TODO-6)
+  - [x] `git rm --cached .cursor` ✅
+  - [x] `rm -rf .cursor` ✅
+  - [x] Remover `.gitmodules` e submodule config ✅
+  - [x] Commit: `"chore: remove .cursor submodule, migrated to dotfiles/global/"` ✅
+- **Status:** ✅ **Completo** (2026-05-11)
 
 ---
 
@@ -192,33 +187,22 @@
 | **TODOs Pendentes** | 0/6 |
 | **TODOs Bloqueados** | 0 |
 | **Decisões Arquiteturais Fechadas** | 4/4 ✅ |
-| **Estimado Restante** | 0 (Fase 5 concluída — Fase 6 é opcional pós-lançamento) |
+| **Estimado Restante** | 0 (todas as fases concluídas) |
 | **Tempo Real (TODO-1+2+3+4+5+6)** | ~45 min (vs. 16-25 horas estimado) ⚡⚡⚡⚡⚡ |
 
 ---
 
 ## 🎯 Status Final
 
-**✅ FASE 5 CONCLUÍDA — Integração AI-ProjectDeveloper v2 está pronta para lançamento**
+**✅ INTEGRAÇÃO v3.0 COMPLETA — AI-ProjectDeveloper distribuído, submodule removido**
 
-### Próximas Ações (Pós-Lançamento):
-
-1. **Fase 6 (Opcional):** Remover git submodule `.cursor` após validação em produção
-   - Timing: Quando stakeholders confirmarem que nova distribuição está estável
-   - Atividades: `git rm --cached .cursor`, remover `.gitmodules`
-
-2. **Documentação Menor (Não-bloqueante):**
-   - Atualizar `README.md` com seção de instalação
-   - Marcar `PLANO-INTEGRACAO-CURSOR-SKILLS.md` como deprecado
-   - Criar `docs/FASE-6-REMOVER-SUBMODULE.md` (quando Fase 6 estiver agendada)
-
-3. **Monitoramento em Produção:**
-   - Validar descoberta de skills em Claude Code, Cursor, Codex (qualitativo)
-   - Validar invocação de agents em Cursor e Codex (qualitativo)
-   - Recolher feedback de usuários
+### Monitoramento em Produção:
+- Validar descoberta de skills em Claude Code, Cursor, Codex (qualitativo)
+- Validar invocação de agents em Cursor e Codex (qualitativo)
+- Recolher feedback de usuários
 
 ---
 
 **Última atualização:** 2026-05-11  
 **Responsável:** Projeto stec-developer-setup  
-**Status Geral:** ✅ **COMPLETO — Pronto para Lançamento**
+**Status Geral:** ✅ **COMPLETO — v3.0 em produção**

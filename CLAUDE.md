@@ -2,7 +2,7 @@
 
 ## 🎯 Objetivo
 
-Centralizar o catálogo **AI-ProjectDeveloper** (316+ skills, 77 agents, rules, hooks) em `dotfiles/global/`, removendo o git submodule `.cursor` e redistribuindo esses recursos via `install.sh` para **Claude Code**, **Cursor IDE** e **Codex CLI**.
+Distribuir o catálogo **AI-ProjectDeveloper** (316 skills, 230 agents, 93 rules) via `install.sh` para **Claude Code**, **Cursor IDE** e **Codex CLI**, usando `dotfiles/global/` como catálogo centralizado.
 
 ## 📊 Arquitetura Adotada
 
@@ -12,7 +12,7 @@ Centralizar o catálogo **AI-ProjectDeveloper** (316+ skills, 77 agents, rules, 
 - `install.sh` executa **duas fases**:
   1. **Fase 1:** Copia `dotfiles/global/` → `~/.claude/`, `~/.cursor/`, `~/.codex/`
   2. **Fase 2:** Copia `dotfiles/[ide]/` → `~/.*/` (sobrescreve Fase 1 se conflito)
-- **Submodule `.cursor`** será removido após TODO-6 ✨
+- **Submodule `.cursor`** foi removido (2026-05-11) ✅
 
 ## 🔄 Decisões Arquiteturais Fechadas (11 mai 2026)
 
@@ -80,24 +80,12 @@ dotfiles/
 
 Isto garante que toda atualização em `dotfiles/` seja **sempre** refletida em `~/.*/` ao correr `install.sh`.
 
-## 📝 TODOs (6 tarefas principais — ver progress.md)
-
-| ID | Atividade | Fase | Status |
-|----|-----------|------|--------|
-| TODO-1 | Inventariar AI-ProjectDeveloper | 1 | ⏳ Pending |
-| TODO-2 | Criar e popular `dotfiles/global/` | 2-3 | ⏳ Pending |
-| TODO-3 | Reorganizar overlays (dedup) | 4 | ⏳ Pending |
-| TODO-4 | Transcrições de formato por IDE | 4 | ⏳ Pending |
-| TODO-5 | Reescrever `install.sh` (2 fases) | 5 | ⏳ Pending |
-| TODO-6 | Validar e testar `install.sh` | 5-7 | ⏳ Pending |
-
 ## 🔗 Documentação Relacionada
 
-- **Plano detalhado:** `@docs/PLANO-INTEGRACAO-AI-PROJECTDEVELOPER-V2.md`
-- **Mapeamento de IDEs:** `@docs/ferramentas/Mapeamento-Arquivos-IDEs.md`
+- **Mapeamento de IDEs:** `docs/ferramentas/Mapeamento-Arquivos-IDEs.md`
 - **Estrutura harness:** `~/.claude/HARNESS.md`
 
 ---
 
-**Status:** Harness aplicado em 2026-05-11  
-**Próximo passo:** TODO-1 (Inventário AI-ProjectDeveloper)
+**Status:** ✅ Integração v3.0 completa (2026-05-11)  
+**Manutenção:** `bash install.sh` para distribuir atualizações
