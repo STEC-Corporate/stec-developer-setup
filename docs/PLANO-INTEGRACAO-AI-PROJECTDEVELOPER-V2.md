@@ -54,9 +54,8 @@ copy_recursive_tree "$DOTFILES_DIR/codex" "$CODEX_CONFIG_DIR" "Codex CLI"
 dotfiles/
 ├── global/                          ← NOVO: Catálogo centralizado (do AI-ProjectDeveloper)
 │   ├── agents/                      # 77 agents corporativos
-│   ├── skills/                      # 316 skills corporativas
+│   ├── skills/                      # 316 skills corporativas (genéricas)
 │   ├── rules/                       # Regras MDC corporativas
-│   ├── codex-skills/                # Skills específicas para Codex
 │   ├── hooks/                       # Hooks de integração
 │   ├── mcp/                         # Configurações MCP
 │   ├── plans/                       # Planos de trabalho
@@ -73,13 +72,15 @@ dotfiles/
 │   └── scripts/                     # Scripts próprios de Cursor
 │
 ├── codex/                           ← Recursos específicos de Codex (override)
-│   ├── skills/                      # Se houver customizações locais
+│   ├── skills/                      # ⭐ Skills Codex do AI-ProjectDeveloper (ex-codex-skills/)
 │   ├── rules/                       # Se houver customizações locais
 │   └── scripts/                     # Scripts próprios de Codex
 │
 └── home/
     └── CLAUDE.md
 ```
+
+**Nota:** A pasta `codex-skills/` do AI-ProjectDeveloper (originalmente em `.cursor/codex-skills/`) é migrada **diretamente** para `dotfiles/codex/skills/` (não para global), pois contém skills já pré-convertidas e formatadas especificamente para o Codex CLI.
 
 ### Fluxo de Distribuição (install.sh)
 
@@ -88,14 +89,14 @@ Fase 1: Copia global → home (SOBRESCREVE arquivos existentes)
 ├── dotfiles/global/agents/* → ~/.cursor/agents/, ~/.codex/agents/
 ├── dotfiles/global/skills/* → ~/.claude/skills/, ~/.cursor/skills/, ~/.codex/skills/
 ├── dotfiles/global/rules/* → ~/.cursor/rules/, ~/.codex/rules/
-├── dotfiles/global/codex-skills/* → ~/.codex/agents/ ⭐ (SEM CONVERSÃO — já estão em formato Codex)
 ├── dotfiles/global/hooks/* → ~/.cursor/hooks.json, ~/.codex/rules/
 └── dotfiles/global/mcp/* → ~/.claude/mcp/
 
 Fase 2: Copia específicas → home (SOBRESCREVE Fase 1 e arquivos existentes)
 ├── dotfiles/claude/* → ~/.claude/
 ├── dotfiles/cursor/* → ~/.cursor/
-└── dotfiles/codex/ → ~/.codex/
+└── dotfiles/codex/* → ~/.codex/
+    └── codex/skills/* → ~/.codex/skills/ ⭐ (Skills Codex pré-convertidas, sobrescrevem global/skills se houver conflito)
 
 Resultado Final: Recursos globais + customizações locais (locais sobrescrevem globais)
 ```
@@ -129,27 +130,25 @@ Resultado Final: Recursos globais + customizações locais (locais sobrescrevem 
 |--------------------------------|----------------------|----------------------|---------------------|
 | `agents/` (agents .md) | **Ignorar** (não usa agents nativos) | `agents/` ← cópia direta | `agents/` ← cópia direta |
 | `skills/**` (SKILL.md genéricos) | `skills/` ← cópia direta | `skills/` ← cópia direta | `skills/` ← cópia direta |
-| `codex-skills/**` (ex-`codex-skills/`) | — | — | **`agents/`** ← cópia direta ⭐ |
 | `rules/*.mdc` | Guardrails em CLAUDE.md (política adicional) | `rules/` ← cópia direta | `rules/` ← cópia direta |
 | `hooks/` + `hooks.json` | Converter para MCP server config | `hooks.json` ← cópia com **paths absolutos** | Converter para `.rules` DSL |
 | `mcp/` | `mcp/` ← cópia direta | — | — |
 | `plans/` | Opcional (se Claude consumir) | Opcional (se Cursor consumir) | Opcional (se Codex consumir) |
 | `schemas/` | Opcional (estrutura) | Opcional (estrutura) | Opcional (estrutura) |
 
+**⭐ ESPECIAL - Artefatos em `dotfiles/codex/`** | | | Codex (`~/.codex`) |
+| `codex/skills/**` (ex-`codex-skills/` do AI-PD) | — | — | `skills/` ← cópia direta (Fase 2, sobrescreve global/skills se conflito) |
+
 ### Nota sobre Conversão e Transformação
 
 **Recursos que NÃO precisam conversão** (cópia 1:1):
 - ✅ `skills/**/*.md` — Formato genérico Markdown, nativo para todas as IDEs
 - ✅ `agents/*.md` — Formato nativo para Cursor e Codex
-- ✅ `codex-skills/**` — Já em formato Codex, cópia direta para `~/.codex/agents/`
+- ✅ `codex/skills/**` — Já em formato Codex, cópia direta para `~/.codex/skills/`
 
 **Recursos que REQUEREM conversão** (transformação necessária):
 - 🔄 `hooks/` — JSON genérico → format específico por IDE
 - 🔄 `rules/*.mdc` — Markdown Context → DSL específica (Cursor `.mdc`, Codex `.rules`)
-
-### Nota Especial: codex-skills
-
-⭐ A pasta `global/codex-skills/` é um **conjunto de skills pré-convertidas especificamente para Codex**. Diferente das skills genéricas em `global/skills/`, os arquivos em `codex-skills/` já estão no formato esperado pelo Codex e devem ser copiados **diretamente** para `~/.codex/agents/` **sem conversão adicional**. Esta é uma migração direta: `global/codex-skills/* → ~/.codex/agents/`.
 
 ### Roteamento e Conversão de Recursos
 
@@ -209,95 +208,114 @@ copy_recursive_tree "$DOTFILES_DIR/global/skills" "$CLAUDE_CONFIG_DIR/skills" "G
 
 ---
 
-## ⭐ Tratamento Especial: `codex-skills/`
+## ⭐ Tratamento Especial: `dotfiles/codex/skills/` (ex-`codex-skills/`)
 
-A pasta `dotfiles/global/codex-skills/` contém um conjunto de **skills já pré-convertidas e formatadas especificamente para o Codex CLI**. Diferente das skills genéricas em `global/skills/` (que são aplicáveis a múltiplas IDEs), o conteúdo de `codex-skills/` já foi transposto para o formato esperado pelo Codex.
+A pasta `dotfiles/codex/skills/` contém um conjunto de **skills já pré-convertidas e formatadas especificamente para o Codex CLI**. Esta pasta recebe diretamente a migração de `codex-skills/` do repositório AI-ProjectDeveloper (que estava originalmente em `.cursor/codex-skills/` por erro arquitetural anterior). Diferente das skills genéricas em `global/skills/` (que são aplicáveis a múltiplas IDEs), o conteúdo de `codex/skills/` já foi transposto para o formato esperado pelo Codex.
 
-### Regra de Cópia para codex-skills
+### Regra de Cópia para codex/skills/
 
-| Origem | Destino | Conversão | Nota |
-|--------|---------|-----------|------|
-| `global/codex-skills/*` | `~/.codex/agents/` | **NENHUMA** | Copiar diretamente, arquivos já estão em formato Codex |
+| Origem | Destino | Conversão | Nota | Fase |
+|--------|---------|-----------|------|------|
+| `.cursor/codex-skills/*` (AI-PD) | `dotfiles/codex/skills/` | **NENHUMA** | Migração direta (copiar conteúdo) | Fase 3 |
+| `dotfiles/codex/skills/*` | `~/.codex/skills/` | **NENHUMA** | Copiar diretamente, arquivos já estão em formato Codex | Fase 2 |
 
 ### Justificativa
 
-- Estes arquivos já passaram por uma **transcrição prévia** do formato genérico para o formato específico do Codex
-- Copiar para `~/.codex/agents/` (não `~/.codex/skills/`) porque Codex organiza agents (não skills)
-- **Não aplicar conversão adicional** — os arquivos já estão prontos
+- Os arquivos em `.cursor/codex-skills/` do AI-ProjectDeveloper já passaram por uma **transcrição prévia** para o formato específico do Codex
+- Migração: copiar para `dotfiles/codex/skills/` (não para `global/codex-skills/`) porque são recursos Codex-específicos, não globais
+- Cópia para home: `dotfiles/codex/skills/*` → `~/.codex/skills/` (Fase 2 sobrescreve Fase 1 se houver conflito com global/skills/)
 
 ### No install.sh
 
-Isso significa que a linha de cópia deve ser (com sobrescrita de arquivos existentes):
+Linhas de cópia (com sobrescrita de arquivos existentes):
 ```bash
-copy_recursive_tree "$DOTFILES_DIR/global/codex-skills" "$CODEX_CONFIG_DIR/agents" "Codex Skills (pre-converted)"
+# Fase 1: Skills genéricas globais também vão para Codex
+copy_recursive_tree "$DOTFILES_DIR/global/skills" "$CODEX_CONFIG_DIR/skills" "Global Skills → Codex"
+
+# Fase 2: Skills Codex-específicas sobrescrevem global se necessário
+copy_recursive_tree "$DOTFILES_DIR/codex/skills" "$CODEX_CONFIG_DIR/skills" "Codex-Specific Skills (sobrescreve global se conflito)"
 # A função copy_recursive_tree DEVE usar: cp -r (sem -n)
 ```
 
-**Atenção:** Diferente de `dotfiles/global/skills/` que vai para `~/.codex/skills/`, os `codex-skills/` vão para `~/.codex/agents/`.
-
-**IMPORTANTE:** Se algum arquivo já existir em `~/.codex/agents/`, ele deve ser sobrescrito. Isto garante sincronização completa.
+**IMPORTANTE:** Se algum arquivo já existir em `~/.codex/skills/`, ele deve ser sobrescrito. Isto garante sincronização completa e que skills Codex-específicas prevalecem sobre genéricas em caso de nome duplicado.
 
 ---
 
-## 🗂️ Estrutura de Pastas Esperada em dotfiles/global/
+## 🗂️ Estrutura de Pastas Esperada em dotfiles/
 
-(Replica exata da estrutura do AI-ProjectDeveloper após migração)
+(Réplica do AI-ProjectDeveloper com `codex-skills/` movido para `dotfiles/codex/skills/`)
 
 ```
-dotfiles/global/
-├── agents/                           # Agentes classificados
-│   ├── INDEX.md
-│   ├── arquitetura-validar-limpa.md
-│   ├── cicd-quality-gates-advisor.md
-│   ├── ...                           # ~77 agents totais
-│   └── README.md
-│
-├── skills/                           # 316 skills com prefixos funcionais
-│   ├── code-consultar-regras/
-│   │   ├── SKILL.md
-│   │   ├── README.md
-│   │   └── scripts/
-│   ├── gate-arquitetura/
-│   │   ├── SKILL.md
+dotfiles/
+├── global/                           # Catálogo centralizado (ex-AI-ProjectDeveloper)
+│   ├── agents/                       # Agentes classificados (~77 agents)
+│   │   ├── INDEX.md
+│   │   ├── arquitetura-validar-limpa.md
+│   │   ├── cicd-quality-gates-advisor.md
+│   │   ├── ...
+│   │   └── README.md
+│   │
+│   ├── skills/                       # Skills genéricas com prefixos funcionais (~316 skills)
+│   │   ├── code-consultar-regras/
+│   │   │   ├── SKILL.md
+│   │   │   ├── README.md
+│   │   │   └── scripts/
+│   │   ├── gate-arquitetura/
+│   │   │   ├── SKILL.md
+│   │   │   └── ...
+│   │   ├── ...
+│   │   ├── INDEX.md
+│   │   └── README.md
+│   │
+│   ├── rules/                        # Regras MDC corporativas
+│   │   ├── submodule-premise.mdc
+│   │   ├── INDEX.md
 │   │   └── ...
-│   ├── ...                           # ~316 skills
-│   ├── INDEX.md
-│   └── README.md
-│
-├── rules/                            # Regras MDC corporativas
-│   ├── submodule-premise.mdc
-│   ├── INDEX.md
-│   └── ...
-│
-├── codex-skills/                     # Skills específicas de Codex
-│   ├── ...
-│   └── README.md
-│
-├── hooks/                            # Hooks de integração
-│   ├── hooks.json
-│   ├── ...
-│   └── README.md
-│
-├── mcp/                              # Configurações MCP
-│   ├── servers/
-│   │   ├── server-1.json
+│   │
+│   ├── hooks/                        # Hooks de integração
+│   │   ├── hooks.json
+│   │   ├── ...
+│   │   └── README.md
+│   │
+│   ├── mcp/                          # Configurações MCP
+│   │   ├── servers/
+│   │   │   ├── server-1.json
+│   │   │   └── ...
+│   │   └── config.json
+│   │
+│   ├── plans/                        # Planos de trabalho
+│   │   ├── template-sdd-feature.plan.md
 │   │   └── ...
-│   └── config.json
+│   │
+│   ├── schemas/                      # Schemas JSON
+│   │   ├── ...
+│   │   └── README.md
+│   │
+│   ├── docs/                         # Documentação (origem AI-ProjectDeveloper)
+│   │   ├── governanca/
+│   │   ├── codex/
+│   │   └── ...
+│   │
+│   └── README.md                     # Cópia do README.md do AI-ProjectDeveloper
 │
-├── plans/                            # Planos de trabalho
-│   ├── template-sdd-feature.plan.md
-│   └── ...
+├── codex/                            # Recursos específicos de Codex
+│   ├── skills/                       # ⭐ Skills Codex-específicas (ex-codex-skills/ de AI-PD)
+│   │   ├── ...
+│   │   └── README.md
+│   ├── rules/                        # Rules específicas de Codex (se houver)
+│   └── scripts/                      # Scripts específicos de Codex
 │
-├── schemas/                          # Schemas JSON
-│   ├── ...
-│   └── README.md
+├── claude/                           # Recursos específicos de Claude
+│   ├── scripts/                      # Scripts próprios
+│   └── [skills personalizadas]
 │
-├── docs/                             # Documentação (origem AI-ProjectDeveloper)
-│   ├── governanca/
-│   ├── codex/
-│   └── ...
+├── cursor/                           # Recursos específicos de Cursor
+│   ├── agents/                       # Agents Cursor-específicas (se houver customizações)
+│   ├── skills/                       # Skills Cursor-específicas (se houver customizações)
+│   └── scripts/
 │
-└── README.md                         # Cópia do README.md do AI-ProjectDeveloper
+└── home/
+    └── CLAUDE.md
 ```
 
 ---
@@ -341,14 +359,15 @@ flowchart LR
 
 ## ⚠️ Riscos e Decisões a Fechar
 
-### **Risco 1: Colisão entre `global/skills/` e `global/codex-skills/` em `~/.codex/`**
+### **Risco 1: Colisão entre `global/skills/` e `codex/skills/` em `~/.codex/skills/`**
 
-**Cenário:** Ambas as pastas instalam em `~/.codex/skills/` (ou `~/.codex/agents/` no caso de codex-skills).
+**Cenário:** Fase 1 copia `global/skills/*` para `~/.codex/skills/`, depois Fase 2 copia `codex/skills/*` para o mesmo destino. Se houver nomes duplicados, qual prevale?
 
 **Mitigação:**
-- ✅ **Precedência definida:** `codex-skills/` SEMPRE sobrescreve `skills/` em caso de nome duplicado
-- ✅ **Documentar:** Adicionar aviso em `dotfiles/global/README.md` e `SKILL.md` de skills genéricas indicando que Codex é especializado
-- ✅ **Teste de colisão:** Validar no Fase 7 se há nomes duplicados
+- ✅ **Precedência definida:** `codex/skills/` (Fase 2) SEMPRE sobrescreve `global/skills/` (Fase 1) em caso de nome duplicado
+- ✅ **Separação clara:** Documente em `dotfiles/codex/README.md` que estas são skills Codex-específicas (já pré-convertidas) que sobrescrevem genéricas
+- ✅ **Teste de colisão:** Validar em Fase 7 se há nomes duplicados e confirmar que sobrescrita funciona como esperado
+- ✅ **Naming convention:** Opcionalmente, prefixar skills genéricas com `generic-` se forem conflituosas com Codex-específicas
 
 ---
 
@@ -443,7 +462,7 @@ flowchart LR
 - [ ] Copiar `agents/` → `dotfiles/global/agents/`
 - [ ] Copiar `skills/` → `dotfiles/global/skills/`
 - [ ] Copiar `rules/` → `dotfiles/global/rules/`
-- [ ] Copiar `codex-skills/` → `dotfiles/global/codex-skills/`
+- [ ] Copiar `codex-skills/` → `dotfiles/codex/skills/` ⭐ (ex-erro arquitetural em `.cursor/codex-skills/`)
 - [ ] Copiar `hooks/` → `dotfiles/global/hooks/`
 - [ ] Copiar `mcp/` → `dotfiles/global/mcp/`
 - [ ] Copiar `plans/` → `dotfiles/global/plans/`
@@ -459,11 +478,11 @@ flowchart LR
 
 ### **Fase 4: Ajustar dotfiles/[claude|cursor|codex]/**
 
-**Objetivo:** Mover/reorganizar recursos específicos por IDE
+**Objetivo:** Mover/reorganizar recursos específicos por IDE, com especial atenção a codex-skills
 
 - [ ] Revisar `dotfiles/claude/` — manter apenas scripts específicos (remover duplicatas)
 - [ ] Revisar `dotfiles/cursor/` — mover base mínimo para `global/`, manter customizações
-- [ ] Revisar `dotfiles/codex/` — mover base mínimo para `global/`, manter customizações
+- [ ] **Revisar `dotfiles/codex/`** — recebe `codex-skills/` migrado de AI-PD, manter como overlay que sobrescreve `global/skills/` se necessário
 - [ ] Aplicar **Regra de Transcrição** se houver formatos diferentes
 - [ ] Documentar o que fica em cada pasta (e por quê)
 
@@ -471,13 +490,20 @@ flowchart LR
 ```
 # Antes
 dotfiles/cursor/skills/ → 16 skills base (duplicadas em global)
-                       
+dotfiles/codex/skills/  → [vazio]
+
 # Depois
 dotfiles/cursor/skills/ → [vazio ou apenas customizações locais]
-                        
+dotfiles/codex/skills/  → skills Codex-específicas (ex-codex-skills/ de AI-PD)
+
 # E em global:
-dotfiles/global/skills/ → 316 skills (inclui as 16 anteriores)
+dotfiles/global/skills/ → 316 skills genéricas (inclui as 16 anteriores, menos as Codex-específicas)
 ```
+
+**Nota sobre `codex-skills/`:**
+- Contém skills já convertidas especificamente para Codex
+- Cópia na instalação: `dotfiles/codex/skills/* → ~/.codex/skills/` (Fase 2 sobrescreve Fase 1)
+- Em caso de nome duplicado com `global/skills/`, a skill Codex-específica prevalece
 
 **Saídas:**
 - Estrutura limpa sem redundâncias
@@ -523,9 +549,6 @@ copy_from_global() {
     copy_recursive_tree "$DOTFILES_DIR/global/rules" "$CURSOR_CONFIG_DIR/rules" "Global Rules → Cursor"
     copy_recursive_tree "$DOTFILES_DIR/global/rules" "$CODEX_CONFIG_DIR/rules" "Global Rules → Codex"
     
-    # Codex-skills: já estão em formato Codex, cópia direta SEM conversão (SOBRESCREVE)
-    copy_recursive_tree "$DOTFILES_DIR/global/codex-skills" "$CODEX_CONFIG_DIR/agents" "Global Codex Skills → Codex Agents (no conversion, OVERWRITES)"
-    
     copy_recursive_tree "$DOTFILES_DIR/global/mcp" "$CLAUDE_CONFIG_DIR/mcp" "Global MCP → Claude"
     
     # Hooks: precisam conversão (ver função separada)
@@ -533,11 +556,14 @@ copy_from_global() {
 }
 
 # Fase 2: Copiar específicas (SOBRESCREVE Fase 1)
-# Esta fase permite customizações locais sobrescreverem o global
+# Esta fase permite customizações locais e skills Codex-específicas sobrescreverem o global
 copy_specific_overrides() {
     copy_recursive_tree "$DOTFILES_DIR/claude" "$CLAUDE_CONFIG_DIR" "Claude Overrides (sobrescreve global)"
     copy_recursive_tree "$DOTFILES_DIR/cursor" "$CURSOR_CONFIG_DIR" "Cursor Overrides (sobrescreve global)"
+    
+    # Codex: skills-específicas já estão em formato Codex, cópia direta SEM conversão (SOBRESCREVE Fase 1)
     copy_recursive_tree "$DOTFILES_DIR/codex" "$CODEX_CONFIG_DIR" "Codex Overrides (sobrescreve global)"
+    # Isto inclui: codex/skills/* → ~/.codex/skills/ (sobrescreve global/skills se conflito)
 }
 
 # Executar ambas as fases
