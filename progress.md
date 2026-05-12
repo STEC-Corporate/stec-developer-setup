@@ -3,8 +3,8 @@
 **Projeto:** stec-developer-setup  
 **Objetivo:** Centralizar catálogo corporativo em `dotfiles/global/`, remover submodule `.cursor`  
 **Data Início:** 2026-05-11  
-**Status Geral:** 🟡 **Em Progresso** (Fase 3 → 4)
-**Progresso:** TODO-1,2,3 ✅ Completo | TODO-4-6 ⏳ Pendentes
+**Status Geral:** 🟡 **Em Progresso** (Fase 4 → 5)
+**Progresso:** TODO-1,2,3,4 ✅ Completo | TODO-5,6 ⏳ Pendentes
 
 ---
 
@@ -104,16 +104,17 @@
 #### TODO-4: Transcrições de Formato por IDE
 - **Descrição:** Garantir que recursos específicos de IDE estão no formato correto
 - **Atividades:**
-  - [ ] Validar `global/skills/` em formato Markdown (genérico para 3 IDEs)
-  - [ ] Validar `global/rules/*.mdc` com frontmatter YAML (Claude + Cursor nativo, Codex converte)
-  - [ ] Validar `global/agents/*.md` com frontmatter YAML (Cursor + Codex nativo)
-  - [ ] Validar `global/hooks.json` com paths absolutos `~/.cursor/hooks/...`
-  - [ ] Validar `global/mcp/` conforme spec Claude
-  - [ ] Confirmar que `codex/skills/` está em formato específico do Codex (sem conversão na Fase 2)
-  - [ ] Criar script de validação de formatos (check-formats.sh)
-- **Bloqueante:** Após TODO-3
+  - [x] Validar `global/skills/` em formato Markdown (genérico para 3 IDEs) ✅ (315 skills válidas)
+  - [x] Validar `global/rules/*.mdc` com frontmatter YAML (Claude + Cursor nativo, Codex converte) ✅ (93 rules válidas)
+  - [x] Validar `global/agents/*.md` com frontmatter YAML (Cursor + Codex nativo) ✅ (229 agents válidos)
+  - [x] Validar `global/hooks.json` — documentar distinção entre global (template) e cursor (canônico) ✅
+  - [x] Validar `global/mcp/` — confirmar como `.example.json` templates (não auto-instalar) ✅
+  - [x] Confirmar que `codex/skills/` está em formato válido (3 skills Codex-específicas) ✅
+  - [x] Criar script de validação de formatos (check-formats.sh) ✅
+- **Bloqueante:** Após TODO-3 ✅
 - **Estimado:** 2-3 horas
-- **Status:** ⏳ **Pending**
+- **Status:** ✅ **Completo** (duração real: ~5 min)
+- **Documento:** `@docs/TODO-4-FORMATOS-IDE.md`
 
 ---
 
@@ -186,12 +187,12 @@
 
 | Métrica | Status |
 |---------|--------|
-| **TODOs Completos** | 3/6 ✅ (TODO-1, TODO-2, TODO-3) |
-| **TODOs Pendentes** | 3/6 ⏳ |
+| **TODOs Completos** | 4/6 ✅ (TODO-1, TODO-2, TODO-3, TODO-4) |
+| **TODOs Pendentes** | 2/6 ⏳ |
 | **TODOs Bloqueados** | 0 |
 | **Decisões Arquiteturais Fechadas** | 4/4 ✅ |
-| **Estimado Restante** | 9-14 horas de trabalho |
-| **Tempo Real (TODO-1+2+3)** | ~15 min (vs. 9-13 horas estimado) ⚡⚡⚡ |
+| **Estimado Restante** | 6-9 horas de trabalho |
+| **Tempo Real (TODO-1+2+3+4)** | ~20 min (vs. 11-16 horas estimado) ⚡⚡⚡ |
 
 ---
 
