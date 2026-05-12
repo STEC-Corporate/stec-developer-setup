@@ -362,8 +362,10 @@ dotfiles/
 │   └── scripts/                      # Scripts específicos de Codex
 │
 ├── claude/                           # Recursos específicos de Claude
-│   ├── scripts/                      # Scripts próprios
-│   └── [skills personalizadas]
+│   ├── skills/                       # Skills específicas de Claude (se houver customizações)
+│   ├── rules/                        # Rules específicas de Claude (se houver customizações)
+│   ├── mcp/                          # MCP servers específicos (se houver customizações)
+│   └── scripts/                      # Scripts próprios
 │
 ├── cursor/                           # Recursos específicos de Cursor
 │   ├── agents/                       # Agents Cursor-específicas (se houver customizações)
