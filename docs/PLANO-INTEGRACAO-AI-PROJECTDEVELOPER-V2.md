@@ -795,19 +795,51 @@ git commit -m "chore: remove .cursor submodule, migrated to dotfiles/global/"
 
 ## ❓ Perguntas para Decisão Final
 
+### ✅ Decisões Fechadas (11 de maio de 2026)
+
 **P1:** Deve versionarmos todos os 316 skills em dotfiles/global/?  
-→ **Decisão necessária:**
-  - A) Sim, versionado (offline, sem submodule)
-  - B) Não, deixar como submodule novo
+→ **✅ APROVADO: Sim, versionado** (offline, sem submodule)
+  - Todos os 316 skills devem ser migrados para `dotfiles/global/skills/`
+  - Torna repositório self-contained e offline-friendly
+  - Remove dependência de `.cursor` submodule
 
 **P2:** Qual é o tamanho estimado de dotfiles/global/ (com todos os arquivos)?  
-→ **Necessário para confirmar que é viável versionado**
+→ **✅ CONFIRMADO: Pode versionar sem problemas**
+  - Não existe restrição de tamanho para incluir todos os 316 skills + agents + rules
+  - Repository size é viável conforme análise de escalabilidade
 
 **P3:** Existe processo de atualização esperado do AI-ProjectDeveloper?  
-→ **Decisão sobre frequência de sincronização e processo**
+→ **✅ DECIDIDO: Este repo será oficial, não sincronizar com `.cursor` futuro**
+  - `.cursor` submodule será **removido** no futuro
+  - `stec-developer-setup` passa a ser **repositório oficial** para o catálogo
+  - Neste momento: **não precisa fazer nada** com AI-ProjectDeveloper
+  - Scripts de sincronização (D3) implementados apenas como fallback opcional
 
 **P4:** Os arquivos existentes em dotfiles/[claude|cursor|codex] devem ser preservados ou descartados?  
-→ **Decisão sobre migração de assets existentes**
+→ **✅ DECIDIDO: Preservar tudo**
+  - Manter `dotfiles/claude/`, `dotfiles/cursor/`, `dotfiles/codex/` como overlays
+  - Manter `dotfiles/global/` como catálogo corporativo
+  - Ambos servem propósitos complementares (global + específicas)
+
+### Implicações das Decisões (Impacto no Plano)
+
+Com estas decisões fechadas, o plano **muda de Cenário 3 (Híbrido) para Cenário 2 (Centralizado em dotfiles/):**
+
+| Aspecto | Antes (Cenário 3) | Depois (Cenário 2) |
+|--------|------|------|
+| **Localização do catálogo corporativo** | `.cursor` submodule | `dotfiles/global/` versionado |
+| **Dependência de `.cursor`** | Mantém submodule | Remove `.cursor` no futuro |
+| **Sincronização com origem** | Automática (git pull) | Manual (script, opcional) |
+| **Repositório oficial** | AI-ProjectDeveloper externo | stec-developer-setup |
+| **Dotfiles específicas** | Preservam apenas base mínima | Preservam como overlays que sobrescrevem |
+| **Install.sh complexidade** | Duas fases (global + overlay) | Duas fases (global + overlay) — mesmo fluxo |
+
+**Implicações diretas:**
+1. ✅ **Fase 1 (Preparação)**: Inventariar AI-ProjectDeveloper e estimar tamanho (confirmado viável)
+2. ✅ **Fase 2-3 (Migração)**: Copiar **todos** os 316 skills + agents + rules para `dotfiles/global/`
+3. ✅ **Fase 4 (Reorganização)**: Manter overlays em `dotfiles/claude|cursor|codex` para customizações
+4. ✅ **Fase 5 (Install.sh)**: Sem mudanças estruturais — fluxo Fase 1 + Fase 2 continua igual
+5. ✅ **Fase 6 (Submodule)**: **Depois de TODO-6**, remover `.gitmodules` e `.cursor/` com commit separado
 
 ---
 
