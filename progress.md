@@ -123,25 +123,27 @@
 #### TODO-5: Reescrever `install.sh` (Duas Fases)
 - **Descrição:** Implementar novo fluxo: Fase 1 (global) + Fase 2 (overlays), com sobrescrita garantida
 - **Atividades:**
-  - [ ] Refactorizar função `copy_recursive_tree` para garantir sobrescrita (`cp -r` sem `-n`)
-  - [ ] Implementar **Fase 1:** distribuir `global/` para 3 IDEs
-    - [ ] `global/skills/* → ~/.claude/skills/` ✅
-    - [ ] `global/skills/* → ~/.cursor/skills/` ✅
-    - [ ] `global/skills/* → ~/.codex/skills/` ✅
-    - [ ] `global/rules/* → ~/.*/rules/` (3 IDEs)
-    - [ ] `global/agents/* → ~/.cursor/agents/` + `~/.codex/agents/`
-    - [ ] `global/mcp/* → ~/.claude/mcp/`
-    - [ ] `global/hooks/` → conversão para cada IDE
-  - [ ] Implementar **Fase 2:** aplicar overlays por IDE
-    - [ ] `dotfiles/claude/* → ~/.claude/` (sobrescreve Fase 1)
-    - [ ] `dotfiles/cursor/* → ~/.cursor/` (sobrescreve Fase 1)
-    - [ ] `dotfiles/codex/* → ~/.codex/` (sobrescreve Fase 1, codex/skills/ > global/skills/)
-  - [ ] Adicionar validação de escrita (verificar permissões, criar dirs se necessário)
-  - [ ] Adicionar logging verbose (`echo "📋 Copiando..."`)
-  - [ ] Testar em ambiente local
-- **Bloqueante:** Após TODO-4
+  - [x] Refactorizar função `copy_recursive_tree` → `copy_tree()` para suportar parâmetro OVERWRITE ✅
+  - [x] Implementar **Fase 1:** distribuir `global/` para 3 IDEs ✅
+    - [x] `global/skills/* → ~/.claude/skills/` ✅
+    - [x] `global/skills/* → ~/.cursor/skills/` ✅
+    - [x] `global/skills/* → ~/.codex/skills/` (genéricas) ✅
+    - [x] `global/codex/skills/* → ~/.codex/skills/` (específicas, sobrescrita) ✅
+    - [x] `global/rules/* → ~/.*/rules/` (3 IDEs) ✅
+    - [x] `global/agents/* → ~/.cursor/agents/` + `~/.codex/agents/` ✅
+    - [x] `global/hooks/* → ~/.cursor/hooks/` ✅
+    - [x] `global/mcp/* → ~/.claude/mcp/` ✅
+    - [x] `global/scripts/* → ~.*/scripts/` (3 IDEs) ✅
+  - [x] Implementar **Fase 2:** aplicar overlays por IDE ✅
+    - [x] `dotfiles/claude/* → ~/.claude/` (sobrescreve Fase 1) ✅
+    - [x] `dotfiles/cursor/* → ~/.cursor/` (sobrescreve Fase 1) ✅
+    - [x] `dotfiles/codex/* → ~/.codex/` (sobrescreve Fase 1) ✅
+  - [x] Adicionar validação de escrita (mkdir -p, cp, chmod +x) ✅
+  - [x] Adicionar logging verbose (FASE 1 e FASE 2 com separação clara) ✅
+  - [ ] Testar em ambiente local (TODO-6)
+- **Bloqueante:** Após TODO-4 ✅
 - **Estimado:** 2-3 horas
-- **Status:** ⏳ **Pending**
+- **Status:** 🟡 **Em Progresso** (Implementação ✅, Testes ⏳)
 
 ---
 
@@ -188,11 +190,12 @@
 | Métrica | Status |
 |---------|--------|
 | **TODOs Completos** | 4/6 ✅ (TODO-1, TODO-2, TODO-3, TODO-4) |
-| **TODOs Pendentes** | 2/6 ⏳ |
+| **TODOs Em Progresso** | 1/6 🟡 (TODO-5 implementação ✅, testes ⏳) |
+| **TODOs Pendentes** | 1/6 ⏳ (TODO-6) |
 | **TODOs Bloqueados** | 0 |
 | **Decisões Arquiteturais Fechadas** | 4/4 ✅ |
-| **Estimado Restante** | 6-9 horas de trabalho |
-| **Tempo Real (TODO-1+2+3+4)** | ~20 min (vs. 11-16 horas estimado) ⚡⚡⚡ |
+| **Estimado Restante** | ~3 horas (TODO-6 apenas) |
+| **Tempo Real (TODO-1+2+3+4)** | ~25 min (vs. 11-16 horas estimado) ⚡⚡⚡ |
 
 ---
 
