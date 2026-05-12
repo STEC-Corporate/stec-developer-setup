@@ -1,0 +1,19 @@
+# Padrões ERE (grep -E): testados contra o caminho completo relativo a docs/ (uma linha = um padrão).
+# Linhas vazias ou # ignoradas.
+# Alinhado a forbidden_globs do manifest de exemplo e ao plano scaffold neutro.
+
+.*/plans-local-templates/.*
+
+^gestao-tarefas/03-especificacao-produto/ui-canonical/
+^gestao-tarefas/03-especificacao-produto/business-rules/
+^gestao-tarefas/03-especificacao-produto/user-flows/
+^gestao-tarefas/03-especificacao-produto/api-specifications/
+
+^gestao-tarefas/_indices/RELATORIO-
+^gestao-tarefas/_indices/.+-mapping\.md$
+
+^gestao-ideias/02-execucao/planejamento/
+
+^gestao-ideias/04-referencia-tecnica/_templates/
+
+.*-mapping\.md$

@@ -1,0 +1,11 @@
+---
+description: Governação SDD — vínculo spec/produto antes de mudanças grandes
+globs: "**/*"
+alwaysApply: true
+---
+
+# SDD e fonte da verdade
+
+- Alterações que mudem **comportamento**, **contrato** ou **jornada** devem estar ligadas a **user story** e/ou **regras de negócio** em `docs/produto/fluxo/` (ou equivalente acordado no repositório).
+- Antes de PRs grandes: confirmar que **fluxos**, **critérios de aceite** e **spec técnica** relevantes foram atualizados ou que existe **follow-up** explícito no corpo do PR.
+- O arquiteto/engenheiro **aprova** o desenho; agentes e IA **propoem** — não substituem decisão de produto ou arquitetura.

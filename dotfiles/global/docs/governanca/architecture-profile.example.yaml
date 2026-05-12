@@ -1,0 +1,50 @@
+version: 1
+modules:
+  - id: backend_api
+    path: apps/backend
+    stack: nestjs
+    styles:
+      - clean_architecture
+      - ddd
+      - hexagonal
+      - layered
+    artifacts_enabled:
+      - entity
+      - value_object
+      - aggregate
+      - domain_service
+      - use_case
+      - dto
+      - repository
+      - port
+      - adapter
+      - controller
+      - service
+      - api_contract
+
+  - id: web_client
+    path: apps/web
+    stack: nextjs
+    styles:
+      - client_server
+      - mvc
+      - layered
+    artifacts_enabled:
+      - view
+      - view_model
+      - presenter
+      - service
+      - dto
+
+  - id: workers
+    path: apps/workers
+    stack: node_generic
+    styles:
+      - serverless
+      - distributed_system
+      - microservices
+    artifacts_enabled:
+      - handler
+      - event_contract
+      - adapter
+      - service

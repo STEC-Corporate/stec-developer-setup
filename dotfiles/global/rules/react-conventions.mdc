@@ -1,0 +1,53 @@
+---
+description: Convencoes React e Next.js obrigatorias nos frontends da holding STEC
+globs: "apps/*/src/**/*.tsx,apps/*/src/**/*.ts"
+alwaysApply: false
+---
+
+# Convenções React / Next.js — Holding STEC
+
+## Componentes
+
+- Sempre componentes funcionais com hooks (sem class components).
+- Um componente por arquivo.
+- Nomenclatura: PascalCase para componentes, camelCase para hooks (`useUserData`).
+- Props tipadas com `interface` (ex.: `interface ButtonProps { ... }`).
+- Proibido `React.FC` — tipar props diretamente: `function Button(props: ButtonProps)`.
+
+## Hooks
+
+- Hooks customizados em `hooks/` ou colocados com o componente que os usa exclusivamente.
+- Prefixo obrigatório: `use` (ex.: `useAuth`, `useUserList`).
+- Proibido lógica de negócio em componentes — extrair para hooks.
+
+## Estado
+
+- Preferir estado local (`useState`) quando o estado é específico do componente.
+- Estado global via contexto ou biblioteca dedicada (Zustand, Jotai) — nunca prop-drilling > 2 níveis.
+- Proibido `useEffect` para lógica de negócio — usar em integrações com APIs externas ou side effects obrigatórios.
+
+## Estilização
+
+- CSS Modules ou Tailwind CSS (conforme definido no projeto).
+- Proibido `style={{}}` inline (exceto valores dinâmicos impossíveis de fazer via classe).
+- Proibido `!important` em CSS.
+
+## Next.js específico
+
+- Usar `app/` directory (App Router) em projetos novos.
+- Componentes server-side por padrão; marcar `'use client'` apenas quando necessário.
+- Metadados via `export const metadata` (não `<head>` manual).
+- Usar `next/image` para todas as imagens (otimização automática).
+- Usar `next/link` para navegação interna.
+
+## Acessibilidade
+
+- Todo elemento interativo deve ter `aria-label` ou texto visível.
+- Usar elementos semânticos HTML (`<button>`, `<nav>`, `<main>`, etc.).
+- Contraste mínimo WCAG AA.
+
+## Performance
+
+- Lazy loading para rotas e componentes pesados (`dynamic(() => import(...), { loading: ... })`).
+- Memoização (`useMemo`, `useCallback`) apenas quando há evidência de re-render desnecessário.
+- Proibido `useEffect` com dependências vazias como substituto de `componentDidMount` sem necessidade.

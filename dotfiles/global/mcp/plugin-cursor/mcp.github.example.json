@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      }
+    }
+  },
+  "workflows": {
+    "submission": {
+      "steps": [
+        "fork_or_sync",
+        "create_branch",
+        "commit_changes",
+        "open_pr",
+        "fetch_checks",
+        "fetch_reviews"
+      ]
+    }
+  }
+}

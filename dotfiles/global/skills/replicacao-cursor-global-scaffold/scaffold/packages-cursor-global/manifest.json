@@ -1,0 +1,29 @@
+{
+  "version": "0.1.0",
+  "description": "Template: ajuste source_root para o caminho relativo ate AI-ProjectDeveloper/.cursor a partir desta pasta.",
+  "source_root": "../../vendor/AI-ProjectDeveloper/.cursor",
+  "bundle_root": "./bundle/.cursor",
+  "agents": [
+    "java-especialista",
+    "kotlin-especialista",
+    "python-especialista",
+    "react-especialista",
+    "react-native-especialista",
+    "nextjs-especialista",
+    "nestjs-especialista"
+  ],
+  "skills": [
+    "gate-arquitetura",
+    "gate-testes",
+    "gate-seguranca",
+    "gate-ci",
+    "java-workflow-base",
+    "kotlin-workflow-base",
+    "python-workflow-base",
+    "typescript-workflow-base",
+    "react-workflow-base",
+    "react-native-workflow-base",
+    "nextjs-workflow-base",
+    "nestjs-workflow-base"
+  ]
+}

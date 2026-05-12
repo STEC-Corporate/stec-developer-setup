@@ -1,0 +1,98 @@
+---
+description: Padrões Tailwind CSS, Shadcn/ui e UI/UX do frontend SoundLink — ordem de classes, Shadcn, cores, margens, responsividade e resumo de modal
+globs: "src/**/*.tsx,src/**/*.ts"
+alwaysApply: false
+---
+
+# Tailwind CSS & UI — Frontend SoundLink Template
+
+## Tailwind — Regras
+
+- **PROIBIDO** usar `@apply` directive — usar utility classes diretamente no HTML.
+- **PROIBIDO** `container mx-auto` — sempre `w-full` para ocupar largura disponível.
+- **PROIBIDO** `style={{}}` inline (exceto valores dinâmicos impossíveis via classe).
+- Ordem de classes: `layout → sizing → spacing → visual → typography → states → responsive`.
+
+```tsx
+// ✅ Correto
+className="flex items-center w-full px-4 py-2 bg-primary text-sm font-medium hover:bg-primary/90 md:px-6"
+
+// ❌ Evitar — ordem aleatória
+className="hover:bg-primary/90 text-sm flex bg-primary px-4 w-full py-2 items-center"
+```
+
+## Shadcn/ui — Convenções de Cores
+
+- Variáveis CSS sem color space function: `--primary: 222.2 47.4% 11.2%;`
+- Usar pares background/foreground: `bg-primary text-primary-foreground`
+- Opacity via `/` notation: `bg-primary/90`
+
+## Margens Padrão de Página (obrigatório)
+
+```tsx
+<div className="w-full px-4 py-6 sm:px-6 lg:px-6 space-y-6">
+  {/* conteúdo */}
+</div>
+```
+
+- Mobile: `px-4` (16px), Tablet/Desktop: `sm:px-6 lg:px-6` (24px).
+- Padding vertical: `py-6` em todos os breakpoints.
+
+## Títulos e Descrições (obrigatório)
+
+```tsx
+<div className="space-y-2">
+  <h2 className="text-2xl font-bold">Título da Seção</h2>
+  <p className="text-sm text-muted-foreground">
+    Descrição explicativa do que a seção faz ou exibe
+  </p>
+</div>
+```
+
+- Títulos: `text-2xl font-bold` — todo título principal deve ter descrição abaixo.
+- Descrições: `text-sm text-muted-foreground`.
+- **PROIBIDO** tooltips em títulos e descrições — são autoexplicativos.
+
+## Cores de Botões (obrigatório)
+
+| Caso | Cor | Implementação |
+|------|-----|---------------|
+| Abre modal / contexto atual | Cor do perfil | `useProfileButtonColor()` |
+| Navega para outra página | Cinza | `variant="pageNav"` ou `bg-gray-100` |
+
+Cores por perfil: Músico=`#2D7A4F`, Contratante=`#3B82F6`, Profissionais=`#8B1A1A`, Admin=`#92400E`.
+
+## Responsividade
+
+- Mobile-first obrigatório.
+- Breakpoints: `sm` 640px, `md` 768px, `lg` 1024px, `xl` 1280px.
+- Touch targets ≥ 44px.
+
+## Acessibilidade
+
+- ARIA labels obrigatórios em elementos interativos sem texto visível.
+- Navegação por teclado (`tabindex="0"` em elementos clicáveis não nativos).
+- Contraste WCAG AA mínimo.
+
+## Resumo antes do envio (modais públicos — obrigatório)
+
+Posição: ao final do conteúdo do modal, antes do footer.
+
+```tsx
+<div className="p-3 border rounded-md bg-muted/10">
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+    <div className="text-sm"><span className="font-medium">Campo:</span> {valor || '-'}</div>
+    {/* outros campos críticos */}
+  </div>
+</div>
+```
+
+- Exibir campos críticos e condicionais (renderizar `-` quando vazio).
+- Não exibir dados sensíveis.
+- Rótulo acessível "Resumo".
+
+## Padrão Universal de UI/UX (referência)
+
+Para implementação detalhada com exemplos completos (botão Criar → modal, card → detalhes, barra de busca, tooltips, TabHelpButton), usar a skill:
+
+> **Skill**: `.cursor/skills/code-aplicar-ui-ux-patterns/SKILL.md`

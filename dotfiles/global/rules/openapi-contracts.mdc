@@ -1,0 +1,12 @@
+---
+description: Convenções para arquivos de contrato OpenAPI/Swagger
+globs: "**/*openapi*.{yml,yaml,json}"
+alwaysApply: false
+---
+
+# OpenAPI / Swagger (contexto)
+
+- Evitar duplicar schemas; usar `$ref` para componentes reutilizáveis.
+- Nomes de operações e tags estáveis para geração de clientes.
+- Campos obrigatórios (`required`) alinhados ao comportamento real do servidor.
+- Se o repo também tiver `**/openapi/**`, duplicar regra ou afinar glob no INDEX do projeto.

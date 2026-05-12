@@ -1,0 +1,12 @@
+---
+description: Convenções backend Python quando arquivos .py estão em contexto
+globs: "**/*.py"
+alwaysApply: false
+---
+
+# Backend Python (contexto)
+
+- Preferir funções e módulos com responsabilidade única; evitar arquivos monolíticos.
+- Tipagem e docstrings onde o projeto já as exige.
+- Respeitar `venv`/Poetry; não sugerir instalação global sem política do repo.
+- Segurança: não expor secrets; usar variáveis de ambiente ou secret manager conforme padrão.

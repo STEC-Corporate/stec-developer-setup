@@ -1,0 +1,111 @@
+---
+description: Ao replicar features do perfil músico para outros perfis, use RAG, siga padrões e execute de forma completa (planos ou TODOs)
+globs: 
+alwaysApply: false
+---
+
+# Replicar features do perfil músico para outros perfis
+
+## Escopo
+
+Esta rule é **específica de projeto**. Ela pressupõe:
+
+- um produto com perfil `músico` funcionando como referência canônica
+- outros perfis derivados que replicam a mesma feature com adequações
+- convenções concretas de UI, rotas, canonical data e nomenclatura do ecossistema SoundLink
+
+Ela não deve ser promovida como regra genérica para qualquer frontend multiperfil sem adaptação explícita.
+
+## Pré-requisitos
+
+Antes de aplicar esta rule, o projeto precisa ter:
+
+- um perfil de referência equivalente ao `músico`
+- documentação canônica em `docs/gestao-tarefas/03-especificacao-produto/ui-canonical/` ou estrutura equivalente
+- docs de apoio como `.cursor/docs/ia/replication-musician-as-template.md`
+- convenções concretas de UI e dados, como rotas, componentes compartilhados e fonte canônica
+
+Se esses pré-requisitos não existirem, o agente deve:
+
+1. parar de tratar o fluxo como replicação direta
+2. pedir confirmação sobre qual tela ou perfil é a referência
+3. adaptar o processo para uma comparação manual, não automática
+
+## Risco de uso fora de contexto
+
+Se usada em outro produto sem o mesmo modelo:
+
+- pode impor uma referência de tela inexistente
+- pode sugerir rotas, componentes e estruturas que não existem
+- pode introduzir acoplamento artificial a um “perfil template” inadequado
+
+Risco prático:
+- **alto** fora do SoundLink ou de produtos com a mesma arquitetura de perfis
+- **baixo a médio** em produtos irmãos que já sigam o mesmo padrão de replicação
+
+O **perfil músico** é o **template/referência** para as features da plataforma. Ao implementar ou replicar uma feature para outros perfis, siga o fluxo abaixo para que os agentes tenham contexto, criem planos (ou TODOs) quando fizer sentido e executem de forma completa.
+
+## 1. Princípio
+
+- **Músico** = referência de fluxos, modais, listas e padrões de UI.
+- **Outros perfis** = mesma feature com **adequações**: o que é relevante, o que não é, o que acrescentar.
+- **Meus Projetos**: para todos os perfis que **podem criar projetos** (gravadora, editora, distribuidor, produtor, estúdio, etc.) — seguir o padrão do músico, inclusive modais.
+- **Meus Eventos**: para perfis que **não criam projetos, apenas eventos** — feature equivalente, mesmo rigor de padrão.
+- **Regras obrigatórias**: cores por perfil (`getProfileButtonClasses(profileType)`), margens e layout padrão, tamanho e comportamento de modais como no músico.
+
+## 2. Recuperar contexto (RAG) antes de codar
+
+Use a ferramenta MCP **`search_documentation`** (soundlink-rag) com perguntas como:
+
+- "perfil músico como template replicação features"
+- "Meus Projetos Meus Eventos padrão por perfil"
+- "cores margens modais padrão UI"
+- "guardrails regras de negócio [feature]"
+- "canonical projects [perfil]"
+
+**Inventário canônico de UI**: Quando for replicar uma **tela** (Profile, Dashboard, Meus Projetos lista ou detalhe), consulte o doc correspondente em **`docs/gestao-tarefas/03-especificacao-produto/ui-canonical/`** (ex.: `meus-projetos-detail-musician.md`). Isso descreve o que deve aparecer na tela (blocos, botões, abas, cores). Ver fluxo em `docs/gestao-tarefas/03-especificacao-produto/ui-canonical/README.md`.
+
+Consulte também o documento **`docs/gestao-ideias/00-governanca/ia/replication-musician-as-template.md`** (princípio completo). Se o MCP não estiver disponível: `npm run rag:query -- "sua pergunta"` e cole a saída no chat.
+
+## 3. Replicação em duas fases (obrigatório para telas)
+
+Ao replicar uma **tela** (Profile, Dashboard, Meus Projetos) para outro perfil:
+
+**Fase 1 — Plano e aprovação (não pular)**
+
+1. Recuperar contexto (RAG + inventário canônico da tela, se existir em `docs/gestao-tarefas/03-especificacao-produto/ui-canonical/`).
+2. Opcional mas recomendado: usar a skill **`validate-screen-against-canonical`** para a tela (profile | dashboard | meus-projetos-list | meus-projetos-detail) e alinhar doc/código do músico se houver drift.
+3. Gerar **plano de replicação** explícito:
+   - Lista de arquivos a criar/alterar no perfil destino.
+   - Para cada bloco da tela: "no músico temos X (arquivo Y); no destino faremos Z (arquivo W); cores via `getProfileButtonClasses(profileType)`".
+   - Lista de elementos de UI (botões, abas, cards) e onde ficarão.
+4. **Mostrar o plano ao usuário** e perguntar: "Posso aplicar essas alterações? Alguma mudança antes?"
+5. **Não aplicar nenhuma alteração de código** até a aprovação.
+
+**Fase 2 — Aplicação**
+
+6. Após aprovação, aplicar **apenas** o que foi aprovado.
+7. Em caso de dúvida (ex.: componente não encontrado), **parar e perguntar** ao usuário em vez de inventar.
+
+**Limpeza de código antigo** (botões/abas que não existem mais no músico): listar os elementos a remover ou alterar e **pedir permissão explícita** antes de cada alteração. Não remover sem confirmação.
+
+## 4. Escopo e execução
+
+- **Identificar**: Quais perfis recebem a feature? Eles têm Projetos ou apenas Eventos?
+- **Plano ou TODOs**: Escopo grande → criar plano (ex.: `.cursor/plans/` ou documento); tarefas menores → TODOs claros.
+- **Executar completo**: Seguir referência do músico, aplicar adequações, respeitar cores/margens/modais, validar dados (canonical/API), modais e rotas.
+
+## 5. Referência de código (músico)
+
+- Meus Projetos: `src/app/musician/projects/`, `src/features/musician-projects/`, canonical em `src/lib/mocks/canonical/projects/` e `project-*.ts`.
+- Perfis genéricos (Meus Projetos): `src/features/generic-profile-projects/`, `load-canonical-projects.ts`, `src/app/<perfil>/projects/page.tsx`.
+- Cores: `getProfileButtonClasses(profileType)`; padrões de UI em `.cursorrules` e `docs/gestao-ideias/00-governanca/ia`.
+
+## 6. Checklist antes de entregar
+
+- [ ] RAG foi usado para trazer contexto (guardrails, padrões, referência da feature).
+- [ ] Para replicação de **telas**: inventário canônico consultado (`docs/gestao-tarefas/03-especificacao-produto/ui-canonical/`) e replicação feita em **duas fases** (plano + aprovação, depois aplicar).
+- [ ] Perfis com projetos têm Meus Projetos no padrão do músico (ou generic); perfis só com eventos têm Meus Eventos.
+- [ ] Cores, margens e modais seguem as regras do projeto.
+- [ ] Dados vêm de canonical (ou contrato definido); listas não ficam vazias sem fonte quando há canonical.
+- [ ] Plano ou TODOs foram criados e a execução foi concluída de forma completa.

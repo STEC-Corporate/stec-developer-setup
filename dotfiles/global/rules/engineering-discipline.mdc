@@ -1,0 +1,19 @@
+---
+description: Checklist de disciplinas de engenharia (docs e specs)
+globs: "docs/**"
+alwaysApply: false
+---
+
+# Disciplinas a considerar em specs e documentação
+
+Quando o documento for **plano de entrega** ou checklist de implementação, cruzar com [fluxo-workflow-agent-hooks-ci.md](../../docs/governanca/fluxo-workflow-agent-hooks-ci.md) (testes, hooks, CI) além dos itens abaixo.
+
+Ao criar ou rever documentos de produto/requisitos, verificar explicitamente o que aplica:
+
+1. **Requisitos:** histórias, critérios de aceite mensuráveis, dependências.
+2. **Desenho:** limites de sistema, integrações, modelo de dados ou contratos.
+3. **Qualidade:** testes previstos, riscos, dados de referência para regressão.
+4. **Operação:** observabilidade, configuração, falhas esperadas (quando relevante).
+5. **Segurança:** dados sensíveis, superfícies de ataque, autenticação/autorização (quando relevante).
+
+Marcar como N/A o que não se aplica, em vez de omitir.

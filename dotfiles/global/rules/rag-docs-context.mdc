@@ -1,0 +1,82 @@
+---
+description: Recuperação de contexto (RAG) — quais documentos incluir conforme a intenção da tarefa
+globs: 
+alwaysApply: false
+---
+
+# Contexto RAG: Recuperar Documentos por Intenção
+
+## Escopo
+
+Esta rule é **específica de projeto**. Ela assume um repositório com:
+
+- estrutura documental inspirada no SoundLink
+- diretórios como `.cursor/docs/ia/`, `docs/gestao-ideias/02-execucao/planejamento/`, `docs/gestao-ideias/00-governanca/decisoes/`, `docs/gestao-tarefas/03-especificacao-produto/business-rules/` e `docs/gestao-ideias/03-produto/fluxo/`
+- playbooks, ADRs, guardrails e North Star já materializados nesses caminhos
+
+Fora desse contexto, ela deve ser tratada como referência adaptável, não como regra universal pronta para uso.
+
+## Pré-requisitos
+
+Antes de aplicar esta rule, o projeto precisa ter pelo menos:
+
+- `.cursor/docs/ia/guardrails.md`
+- `docs/gestao-ideias/02-execucao/planejamento/metrics/north-star.md`
+- algum conjunto consistente entre `docs/gestao-ideias/00-governanca/decisoes/`, `docs/gestao-tarefas/03-especificacao-produto/business-rules/`, `docs/gestao-ideias/03-produto/fluxo/` e `.cursor/docs/ia/playbooks/`
+
+Se esses artefatos não existirem, o agente deve:
+
+1. reconhecer a ausência
+2. evitar citar caminhos como se fossem válidos
+3. adaptar a recuperação para a estrutura documental real do projeto
+
+## Risco de uso fora de contexto
+
+Se usada em um projeto sem essa estrutura:
+
+- o agente pode recuperar caminhos inexistentes
+- pode priorizar documentos errados
+- pode dar falsa sensação de cobertura documental
+
+Risco prático:
+- **médio a alto** em projetos sem taxonomia documental semelhante ao SoundLink
+- **baixo** em projetos já alinhados ao mesmo modelo documental
+
+Quando o usuário pedir decisão, priorização, validação ou alinhamento estratégico, **inclua no contexto** os documentos abaixo conforme o tipo de pergunta. Use @-mention dos arquivos ou cole os trechos relevantes no chat.
+
+## Mapeamento Intenção → Documentos
+
+| Intenção / Pergunta | Documentos a recuperar (incluir no contexto) |
+|---------------------|------------------------------------------------|
+| **Guardrails / O que podemos ou não fazer** | `docs/gestao-ideias/00-governanca/ia/guardrails.md` |
+| **Priorização de features / O que fazer primeiro** | `docs/gestao-ideias/00-governanca/ia/guardrails.md`, `docs/gestao-ideias/00-governanca/ia/playbooks/feature-prioritization.md`, `docs/gestao-ideias/02-execucao/planejamento/metrics/north-star.md` |
+| **North Star / Métrica principal** | `docs/gestao-ideias/02-execucao/planejamento/metrics/north-star.md` |
+| **Decisões arquiteturais / ADRs** | `docs/gestao-ideias/00-governanca/decisoes/` (ADR relevante; listar com `docs/gestao-ideias/00-governanca/decisoes/README.md`) |
+| **Ranking / Busca / Dados verificáveis** | `docs/gestao-ideias/00-governanca/ia/guardrails.md` (§ ranking), `docs/gestao-ideias/00-governanca/decisoes/adr-002-merit-based-ranking-only.md` |
+| **Conflito / Resolução de conflito** | `docs/gestao-ideias/00-governanca/ia/playbooks/conflict-resolution.md` |
+| **Comunicação / Tom** | `docs/gestao-ideias/00-governanca/ia/playbooks/communication-guidelines.md` |
+| **Clean Architecture / Camadas** | `docs/gestao-ideias/00-governanca/decisoes/adr-004-clean-architecture-frontend.md`, `.cursorrules` (§ Arquitetura) |
+| **Regras de negócio de uma feature** | `docs/gestao-tarefas/03-especificacao-produto/business-rules/` ou `docs/gestao-tarefas/03-especificacao-produto/` (fe-*.md da feature) |
+| **Replicar features do músico para outros perfis** | `docs/gestao-ideias/00-governanca/ia/replication-musician-as-template.md` — músico como template; Meus Projetos (perfis que criam projetos) e Meus Eventos (perfis que só criam eventos); padrões de cores, margens e modais. **Inventário canônico de UI**: `docs/gestao-tarefas/03-especificacao-produto/ui-canonical/README.md` e, conforme a tela, `profile-musician.md`, `dashboard-musician.md`, `meus-projetos-list-musician.md`, `meus-projetos-detail-musician.md`. Regra: `.cursor/rules/replication-musician-as-template.mdc`. Use `search_documentation` para "perfil músico template replicação", "Meus Projetos Meus Eventos", "cores margens modais", "ui canônico [tela]". |
+| **Triagem / reorganização / arquivo vs referência / espelho do código** | `docs/gestao-ideias/00-governanca/politica-classes-estado-documentacao.md`, `docs/gestao-ideias/00-governanca/fluxo-documentacao-docs.md`, `docs/gestao-ideias/00-governanca/MAPA-DOCUMENTOS.md` |
+| **Ciclo de vida de documentos / mover exploracao → execucao** | `.cursor/rules/document-lifecycle.mdc`, `.cursor/skills/docs-transicao-ciclo-vida/SKILL.md`, `docs/gestao-ideias/00-governanca/politica-classes-estado-documentacao.md` |
+| **Estratégia de IA / Agents e Skills** | `docs/gestao-ideias/00-governanca/ia/README.md`, `docs/gestao-ideias/00-governanca/ia/subagents.md`, `docs/gestao-ideias/00-governanca/ia/skills-recomendadas.md` |
+| **Prompts prontos para IA** | `docs/gestao-ideias/00-governanca/ia/prompts.md` |
+
+## Uso do script de busca
+
+Para uma pergunta livre (ex: "como calculamos prioridade de feature?"), rode o script e cole a saída no chat:
+
+```bash
+node scripts/rag-query-docs.js "como calculamos prioridade de feature?"
+```
+
+Assim você injeta trechos relevantes da documentação no contexto (RAG manual).
+
+## Regra fixa
+
+**Antes de implementar qualquer feature**: considerar sempre `docs/gestao-ideias/00-governanca/ia/guardrails.md` e `docs/gestao-ideias/02-execucao/planejamento/metrics/north-star.md` (já referenciados no `.cursorrules`). Esta regra complementa com os demais documentos por intenção.
+
+## MCP fleet (Cursor)
+
+Quando houver vários servidores MCP (RAG, Code-Inspector, Product, Project), use também [.cursor/rules/mcp-fleet-routing.mdc](./mcp-fleet-routing.mdc) e [docs/mcp-fleet-contract.md](../../docs/mcp-fleet-contract.md) para ordem e gatilhos.

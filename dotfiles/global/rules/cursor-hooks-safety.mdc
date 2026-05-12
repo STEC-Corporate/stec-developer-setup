@@ -1,0 +1,14 @@
+---
+description: Revisão de segurança e boas práticas ao editar Cursor Hooks e scripts em hooks/.
+globs:
+  - "**/hooks/**"
+  - "**/hooks.json"
+alwaysApply: false
+---
+
+# Cursor Hooks — segurança
+
+- **Nunca** commitar tokens, passwords ou chaves privadas em scripts ou `local.env` (este último deve estar ignorado pelo git em [hooks/.gitignore](../hooks/.gitignore)).
+- Revisar **paths** e comandos antes de merge: hooks executam com privilégios do usuário local.
+- Preferir **comandos explícitos** e curtos; evitar `curl | bash` de origens não confiáveis.
+- Documentação: [hooks/README.md](../hooks/README.md) e [fluxo-workflow-agent-hooks-ci.md](../../docs/governanca/fluxo-workflow-agent-hooks-ci.md).

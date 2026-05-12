@@ -1,0 +1,53 @@
+---
+description: Premissa arquitetural do AI-ProjectDeveloper como submodule Git da holding STEC
+alwaysApply: true
+---
+
+# Premissa Arquitetural: AI-ProjectDeveloper como Submodule
+
+Este repositório (AI-ProjectDeveloper) é um **submodule Git** da holding STEC.
+
+## Como funciona
+
+As pastas `agents/`, `skills/`, `rules/` e `plans/` estão na **raiz deste repo intencionalmente**.
+
+Cada projeto filho da holding adiciona este repo como submodule apontando para `.cursor/`:
+
+```bash
+git submodule add https://github.com/STEC-Corporate/AI-ProjectDeveloper .cursor
+```
+
+Com isso, ao clonar o projeto pai:
+
+| Pasta neste repo | Caminho no projeto pai |
+|---|---|
+| `agents/` | `.cursor/agents/` |
+| `skills/` | `.cursor/skills/` |
+| `rules/` | `.cursor/rules/` |
+| `plans/` | `.cursor/plans/` |
+| `README.md` | `.cursor/README.md` |
+
+O Cursor descobre agents e skills automaticamente nos projetos pai porque os paths `.cursor/agents/` e `.cursor/skills/` são os caminhos oficiais reconhecidos pelo Cursor.
+
+## Implicações para agentes
+
+- **Nunca sugerir mover** `agents/`, `skills/`, `rules/` ou `plans/` para dentro de `.cursor/` neste repo — a estrutura na raiz **é o design correto**.
+- **Nunca criar symlinks** para resolver "descoberta automática" neste repo — o problema não existe nos projetos pai.
+- Neste repo isolado os paths não são descobertos pelo Cursor diretamente, mas **nos projetos pai são**, via submodule montado em `.cursor/`.
+- Atualizações feitas neste repo se propagam para **todos os projetos filho** da holding via `git submodule update`.
+- Ao criar novos agents ou skills, mantê-los sempre na raiz (`agents/` e `skills/`), nunca em subpastas `.cursor/`.
+
+## Projetos filho que consomem este submodule
+
+São os projetos da holding STEC que adicionam este repo como `.cursor/`. Exemplos de uso:
+
+```bash
+# No projeto pai: adicionar submodule
+git submodule add https://github.com/STEC-Corporate/AI-ProjectDeveloper .cursor
+
+# Atualizar para última versão do submodule
+git submodule update --remote .cursor
+
+# Clonar projeto pai já com o submodule
+git clone --recurse-submodules <url-projeto-pai>
+```

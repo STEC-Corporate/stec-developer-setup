@@ -1,0 +1,11 @@
+---
+description: Orientação de arquitetura (Arquitetura orientada a eventos) quando documentação em docs está em foco.
+globs: docs/**/*.md
+alwaysApply: false
+---
+
+# Arquitetura orientada a eventos
+
+- Este arquivo reforça decisões arquiteturais alinhadas a **SDD**; ver [00-sdd-governance.mdc](00-sdd-governance.mdc).
+- Para detalhe operacional do tema, preferir o agent **[arch-orientada-eventos-guia](../agents/arch-orientada-eventos-guia.md)**.
+- Não substituir revisão humana de arquitetura ou aprovação de produto.

@@ -1,0 +1,19 @@
+---
+description: Sugestão de revisão com agents cloud transversais em PRs que alterem infra crítica.
+globs:
+  - "**/*.tf"
+  - "**/infrastructure/**"
+  - "**/terraform/**"
+  - "**/kubernetes/**/deployment*.yaml"
+alwaysApply: false
+---
+
+# Cloud — revisão de arquitetura (heurística)
+
+Em alterações que **introduzam novos serviços**, **expõem dados** ou **mudem custo significativo**:
+
+1. Considerar inventário com [cloud-architecture-discover-guia](../agents/cloud-architecture-discover-guia.md).
+2. Atualizar ou acrescentar diagrama com [cloud-architecture-diagram-guia](../agents/cloud-architecture-diagram-guia.md).
+3. Rever trade-offs com [cloud-architecture-optimize-guia](../agents/cloud-architecture-optimize-guia.md) e impacto financeiro com [cloud-finops-guia](../agents/cloud-finops-guia.md).
+
+Não substitui revisão humana nem aprovação de segurança/custo da organização.

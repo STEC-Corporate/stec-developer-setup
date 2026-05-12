@@ -1,0 +1,11 @@
+---
+description: Orientação de arquitetura (Monólito modular) quando documentação em docs está em foco.
+globs: docs/**/*.md
+alwaysApply: false
+---
+
+# Monólito modular
+
+- Este arquivo reforça decisões arquiteturais alinhadas a **SDD**; ver [00-sdd-governance.mdc](00-sdd-governance.mdc).
+- Para detalhe operacional do tema, preferir o agent **[arch-monolito-modular-guia](../agents/arch-monolito-modular-guia.md)**.
+- Não substituir revisão humana de arquitetura ou aprovação de produto.

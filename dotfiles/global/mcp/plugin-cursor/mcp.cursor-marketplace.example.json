@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "cursorMarketplace": {
+      "command": "cursor-marketplace-mcp",
+      "args": [],
+      "env": {
+        "CURSOR_MARKETPLACE_TOKEN": "${CURSOR_MARKETPLACE_TOKEN}"
+      }
+    }
+  },
+  "workflows": {
+    "publish": {
+      "steps": [
+        "validate_manifest_and_metadata",
+        "validate_submission_payload",
+        "submit_or_prepare_submission",
+        "track_publication_state"
+      ]
+    }
+  }
+}

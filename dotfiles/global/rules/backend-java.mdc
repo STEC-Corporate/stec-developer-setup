@@ -1,0 +1,12 @@
+---
+description: Convenções backend Java quando arquivos .java estão em contexto
+globs: "**/*.java"
+alwaysApply: false
+---
+
+# Backend Java (contexto)
+
+- Preferir injeção via construtor em serviços Spring.
+- Validar entradas em DTOs (Bean Validation ou equivalente).
+- Nomes explícitos; evitar abreviaturas opacas em APIs públicas.
+- Alinhar a testes existentes no módulo antes de propor novos padrões divergentes.

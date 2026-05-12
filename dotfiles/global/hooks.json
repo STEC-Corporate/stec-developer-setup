@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "bash .cursor/hooks/cursor-hooks-dispatch.sh sessionStart"
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": "bash .cursor/hooks/cursor-hooks-dispatch.sh afterFileEdit"
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "command": "bash .cursor/hooks/cursor-hooks-dispatch.sh beforeShellExecution"
+      }
+    ],
+    "preToolUse": [
+      {
+        "command": "bash .cursor/hooks/cursor-hooks-dispatch.sh preToolUse",
+        "matcher": "(?i)^(Write|StrReplace|ApplyPatch|EditNotebook|search_replace|apply_patch)$",
+        "timeout": 5,
+        "failClosed": false
+      }
+    ],
+    "stop": [
+      {
+        "command": "bash .cursor/hooks/on-stop.sh"
+      }
+    ],
+    "beforeSubmitPrompt": [
+      {
+        "command": "bash .cursor/hooks/plan-brief-before-submit.sh",
+        "timeout": 5,
+        "failClosed": false
+      }
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+---
+description: Limites de linhas para agents, skills, rules e docs de automação assistida.
+globs: **/*.{md,mdc,yaml,yml}
+alwaysApply: false
+---
+
+# Limites de linhas para contexto LLM
+
+Política **balanced** do projeto para reduzir custo de contexto e preservar velocidade do Agent.
+
+## Limites
+
+- Rules em `rules/` (`.md`/`.mdc`): **máximo 500 linhas**.
+- Skills (`SKILL.md` em `skills/**`): **máximo 700 linhas**.
+- Agents (`agents/*.md`): **máximo 400 linhas**.
+- Docs operacionais de IA (`*.md` sobre agents/rules/hooks/skills na raiz e `docs/governanca/**/*.md`): **máximo 500 linhas**.
+
+## Regras de manutenção
+
+- Se ultrapassar limite, dividir por tema (modularização) e manter referências cruzadas curtas.
+- Priorizar instruções acionáveis; mover detalhe extenso para arquivos de referência.
+- Evitar duplicação de conteúdo entre rules/skills/docs.
+
+## Exceções
+
+- Só com justificativa explícita de arquitetura/governança no PR ou no doc de governança.
+- Mesmo com exceção, preferir divisão em blocos menores para melhor recuperação pelo modelo.

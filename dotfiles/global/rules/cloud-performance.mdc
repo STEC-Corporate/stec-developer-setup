@@ -1,0 +1,19 @@
+---
+description: Performance e escalabilidade em arquiteturas cloud — latência, caching, quotas e anti-padrões.
+globs:
+  - "**/*.tf"
+  - "**/*.tfvars"
+  - "**/*docker-compose*.yml"
+  - "**/kubernetes/**/*.yaml"
+alwaysApply: false
+---
+
+# Cloud — performance
+
+- **Região e AZ:** colocar usuários e dependências próximos; documentar latência aceitável se houver tráfego cross-region.
+- **Escalabilidade:** preferir auto scaling / gestão elástica a capacidade fixa quando o padrão de carga for variável.
+- **Caching e CDN:** conteúdo estático e respostas cacheáveis atrás de CDN ou cache de aplicação quando aplicável.
+- **Quotas e limites:** validar limites de serviço (API rate, concorrência serverless, IOPS) antes de produção.
+- **Integrações:** evitar padrões N+1 em chamadas a serviços geridos; agrupar e usar batch/async quando possível.
+
+Agent: [cloud-architecture-optimize-guia](../agents/cloud-architecture-optimize-guia.md).

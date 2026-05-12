@@ -1,0 +1,11 @@
+---
+description: Convenções Javalin quando arquivos correspondentes estão em foco.
+globs: **/*.{java,kt}
+alwaysApply: false
+---
+
+# Javalin
+
+- Preferir padrões idiomáticos do Javalin; evitar misturar estilos de outros frameworks no mesmo módulo.
+- Alinhar alterações de comportamento a **user stories** / **regras de negócio** em `docs/produto/fluxo/` (ver `00-sdd-governance.mdc`).
+- Para decisão macro de stack, envolver **[stack-java-guia](../agents/stack-java-guia.md)**.

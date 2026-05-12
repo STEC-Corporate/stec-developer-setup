@@ -1,0 +1,11 @@
+---
+description: Convenções Java desktop (UI em pacotes ui, javafx ou swing)
+globs: "**/ui/**/*.java"
+alwaysApply: false
+---
+
+# Java desktop (contexto)
+
+- Aplicável a JavaFX/Swing em pastas típicas `ui/`, `javafx/`, `swing/` — **afinar globs** no projeto se a estrutura for outra.
+- Nunca bloquear Event Dispatch Thread / JavaFX Application Thread.
+- Preferir composição de views a classes gigantes de frame único.

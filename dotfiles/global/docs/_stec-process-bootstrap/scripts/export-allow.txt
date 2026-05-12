@@ -1,0 +1,31 @@
+# Paths relativos a docs/. Linhas com @ = prefixo (todos os ficheiros sob esse directório).
+# Sem @ = caminho exacto de ficheiro.
+# Comentários: linhas que começam por #
+
+gestao-tarefas/README.md
+gestao-tarefas/tasklink-gestao-tarefas.md
+gestao-tarefas/tasklink-travas-repos.md
+
+gestao-tarefas/01-intake-ideias/IDEIAS-ATIVAS.md
+gestao-tarefas/01-intake-ideias/README.md
+
+gestao-tarefas/02-triagem-refinamento/README.md
+
+gestao-tarefas/03-especificacao-produto/README.md
+
+gestao-tarefas/04-planejamento-execucao/README.md
+# Nota: QUADRO-ATUAL.md e outros quadros vivos não estão na allowlist — manter stubs no pacote neutro à mão.
+
+gestao-tarefas/05-implementacao-validacao/README.md
+gestao-tarefas/06-release-retrospectiva/README.md
+gestao-tarefas/90-banco-ideias/README.md
+
+@gestao-tarefas/_templates/
+gestao-tarefas/_indices/README.md
+
+gestao-ideias/README.md
+gestao-ideias/00-governanca/README.md
+gestao-ideias/01-exploracao/README.md
+gestao-ideias/02-execucao/README.md
+gestao-ideias/03-produto/README.md
+gestao-ideias/04-referencia-tecnica/README.md

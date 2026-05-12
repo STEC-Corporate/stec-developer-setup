@@ -1,0 +1,25 @@
+---
+description: Gates de qualidade e seguranca para criacao e submissao de plugins Cursor.
+globs:
+  - "**/.cursor-plugin/plugin.json"
+  - "**/.cursor-plugin/marketplace.json"
+  - "**/skills/**/SKILL.md"
+  - "**/agents/*.md"
+  - "**/rules/*.mdc"
+  - "**/commands/*.{md,txt}"
+alwaysApply: false
+---
+
+# Plugin Cursor quality gates
+
+- Exigir `.cursor-plugin/plugin.json` valido e coerente com o nome da pasta do plugin.
+- Bloquear paths absolutos e referencias com `..` em manifests e declaracoes de componentes.
+- Garantir que caminhos declarados em `skills`, `rules`, `agents`, `commands`, `hooks` e `mcpServers` existem.
+- Exigir frontmatter minimo:
+  - Skills: `name`, `description`
+  - Agents: `name`, `description`
+  - Rules: `description`, `alwaysApply` (e `globs` quando aplicavel)
+  - Commands: `name`, `description`
+- Em repos multi-plugin, validar consistencia entre `.cursor-plugin/marketplace.json` e cada `.cursor-plugin/plugin.json`.
+- Exigir `README.md` com finalidade, instalacao, uso e limitacoes de seguranca.
+- Antes da submissao oficial, gerar relatorio pass/fail com recomendacao final.

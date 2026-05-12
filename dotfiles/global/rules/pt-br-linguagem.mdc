@@ -1,0 +1,45 @@
+---
+description: Português do Brasil (PT-BR) como norma única de copy e documentação neste repositório.
+alwaysApply: true
+---
+
+# Norma de língua: português do Brasil (PT-BR)
+
+Este projeto **escreve e mantém** texto em **português do Brasil**, não em português de Portugal (PT-PT).
+
+## Obrigações para agentes e contribuidores
+
+- **Documentação** (`docs/`, `README.md`, comentários orientados ao leitor, ADRs, CHANGELOGs de pacotes): usar vocabulário e ortografia **PT-BR**.
+- **Copy de UI** visível ao usuário (strings em componentes, `aria-label`, mensagens de erro): **PT-BR**.
+- **Comentários em código**: preferir **PT-BR** quando estiverem em português (facilita consistência com o resto do repo).
+- **Nomes de arquivos e rotas** já publicados (ex.: slugs com `compartilhados` no nome de um ADR) **não se renomeiam** só por norma de língua; corrige-se o **conteúdo** e mantém-se o path estável até decisão explícita de migração.
+
+## Troca típica PT-PT → PT-BR (referência rápida)
+
+| PT-PT | PT-BR |
+|-------|--------|
+| utilizador(es) | usuário(s) |
+| actual, actualizar, … | atual, atualizar, … |
+| canónico / canónica | canônico / canônica |
+| secção(ões) | seção(ões) |
+| ficheiro(s) | arquivo(s) |
+| directamente, directo | diretamente, direto |
+| objecto, objectivo | objeto, objetivo |
+| ecrã(s) | tela(s) |
+| partilhar, partilhado(s) | compartilhar, compartilhado(s) |
+| sinónimo(s) | sinônimo(s) |
+| contacto (meio de contacto) | contato (meio de contato) |
+| activo / activa | ativo / ativa |
+| afectar | afetar |
+| grelha (layout) | grade |
+| equipa | equipe |
+| óptimo / óptima | ótimo / ótima |
+| projecto(s) | projeto(s) |
+| registar | registrar |
+
+**Automação:** script idempotente em `scripts/normalize-pt-br.mjs` (preserva o filename `adr-004-mocks-partilhados-cross-repo.md` nos links).
+
+## Documentação de governação
+
+- Regra Cursor: este arquivo (`pt-br-linguagem.mdc`).
+- Alinhamento com glossário de produto: `docs/planejamento/glossario-olinket.md` e **ADR-001** (terminologia).

@@ -1,0 +1,11 @@
+---
+description: Convenções JavaFX quando arquivos correspondentes estão em foco.
+globs: **/*.{java,fxml}
+alwaysApply: false
+---
+
+# JavaFX
+
+- Preferir padrões idiomáticos do JavaFX; evitar misturar estilos de outros frameworks no mesmo módulo.
+- Alinhar alterações de comportamento a **user stories** / **regras de negócio** em `docs/produto/fluxo/` (ver `00-sdd-governance.mdc`).
+- Para decisão macro de stack, envolver **[stack-java-desktop-guia](../agents/stack-java-desktop-guia.md)**.

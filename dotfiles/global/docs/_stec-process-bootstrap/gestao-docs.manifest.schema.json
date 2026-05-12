@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stec.holding/schemas/gestao-docs.manifest.json",
+  "title": "gestao-docs manifest",
+  "type": "object",
+  "required": ["content_source", "project_name", "forbidden_globs"],
+  "properties": {
+    "content_source": {
+      "type": "string",
+      "const": "neutral_pack_only",
+      "description": "Única fonte permitida para scaffold de gestão STEC."
+    },
+    "project_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "repo_url": {
+      "type": "string",
+      "description": "URL remoto opcional para READMEs."
+    },
+    "forbidden_globs": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" }
+    },
+    "profiles": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Perfis para docs-criar-doc-structure após scaffold."
+    },
+    "p0_require_tasklink_hook": {
+      "type": "boolean",
+      "default": false
+    },
+    "tasklink_doc_lock_expected": {
+      "type": "string",
+      "enum": ["off", "soft", "strict", "any"],
+      "default": "any"
+    },
+    "p0_env_source": {
+      "type": "string",
+      "enum": ["shell", "user_declared", "skip"],
+      "default": "user_declared"
+    }
+  },
+  "additionalProperties": false
+}

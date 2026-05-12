@@ -1,0 +1,53 @@
+---
+description: Guardrails de Clean Architecture obrigatorios em todos os projetos backend da holding STEC
+globs: "apps/*/src/**/*.ts,src/**/*.ts"
+alwaysApply: false
+---
+
+# Clean Architecture Guardrails — Holding STEC
+
+## Regras de dependência (invioláveis)
+
+```
+Presentation → Application → Domain
+Infrastructure → Domain (implementa interfaces)
+```
+
+- `domain/` **nunca** importa de `application/`, `infrastructure/` ou `presentation/`.
+- `application/` **nunca** importa de `infrastructure/` ou `presentation/`.
+- `infrastructure/` implementa interfaces de `domain/interfaces/`.
+- `presentation/` chama use-cases de `application/`, nunca acessa repositórios diretamente.
+
+## Proibições absolutas
+
+- Proibido lógica de negócio em controllers ou repositories.
+- Proibido import de ORM (Prisma, TypeORM) em camadas `domain/` ou `application/`.
+- Proibido import de `express`, `fastify` ou `@nestjs/*` em camadas `domain/` ou `application/`.
+- Proibido entidades de domínio expostas diretamente nas respostas HTTP (usar DTOs de resposta).
+
+## Entidades e Value Objects
+
+- Entidades encapsulam invariantes de negócio — validar no construtor ou método `create()`.
+- Value Objects são imutáveis — sem setters, criados via factory.
+- Erros de validação de domínio são tipos, não exceções (`Result<T, E>`).
+
+## Repositórios
+
+- Interface em `domain/interfaces/` (ex.: `IUserRepository`).
+- Implementação em `infrastructure/repositories/` (ex.: `PrismaUserRepository`).
+- Retornar entidades de domínio, não registros de banco.
+
+## Use Cases
+
+- Um use case por arquivo, um único método `execute(input): Promise<Result<Output>>`.
+- Sem acesso direto a HTTP, banco ou qualquer infraestrutura.
+- Deve ser testável isoladamente com mocks das interfaces de repositório.
+
+## Detecção de violações
+
+Sinais de violação de Clean Architecture:
+- Import de `prisma` em arquivo fora de `infrastructure/`
+- Import de `@nestjs/common` em arquivo em `domain/` ou `application/`
+- Controller com mais de 20 linhas de lógica
+- Repositório com `if/else` de regra de negócio
+- Use case com `req`, `res`, `ctx` como parâmetros

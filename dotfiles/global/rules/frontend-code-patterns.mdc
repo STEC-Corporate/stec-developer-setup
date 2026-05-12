@@ -1,0 +1,126 @@
+---
+description: Padrões de código TypeScript/React/Next.js específicos do frontend SoundLink — nomenclatura, imports, error handling, DI, Zod, segurança e API
+globs: "src/**/*.ts,src/**/*.tsx"
+alwaysApply: false
+---
+
+# Padrões de Código — Frontend SoundLink Template
+
+## Estrutura de Imports (ordem obrigatória)
+
+```typescript
+// 1. Bibliotecas externas
+import React from 'react'
+
+// 2. Componentes UI (shadcn)
+import { Button } from '@/components/ui/button'
+
+// 3. Componentes internos
+import { ProfileHeader } from '@/components/profile-header'
+
+// 4. Hooks e utils
+import { useAuth } from '@/hooks/use-auth'
+import { cn } from '@/lib/utils'
+
+// 5. Types — sempre com 'import type'
+import type { User } from '@/types/user'
+```
+
+## Nomenclatura TypeScript
+
+| Construto | Convenção | Exemplo |
+|-----------|-----------|---------|
+| Boolean var | auxiliary verb | `isLoading`, `hasError`, `canEdit` |
+| Event handler | `handle` prefix | `handleClick`, `handleSubmit` |
+| Função pura | `function` keyword | `function processData()` |
+| Arrow function constante | `const` | `const formatDate = ...` |
+| Interfaces | PascalCase descritivo | `UserProfile`, `ApiResponse` |
+| Types ambíguos | PascalCase + `Type` | `UserType`, `StateType` |
+| Diretórios | kebab-case | `auth-wizard`, `user-profile` |
+| Arquivos | kebab-case | `user.types.ts`, `auth.config.ts` |
+
+## Error Handling — Early Returns (obrigatório)
+
+```typescript
+// ✅ Guard clauses primeiro
+function processUser({ user, permissions }: ProcessUserProps) {
+  if (!user) return { success: false, error: 'Usuário não encontrado' }
+  if (!permissions) return { success: false, error: 'Permissões necessárias' }
+  if (!user.isActive) return { success: false, error: 'Usuário inativo' }
+  return { success: true, data: processedUser }
+}
+```
+
+## Result Pattern (obrigatório para API services)
+
+```typescript
+type Result<T, E = Error> =
+  | { success: true; data: T }
+  | { success: false; error: E }
+```
+
+## Validação com Zod (obrigatório em forms/APIs)
+
+- Schema Zod é fonte da verdade — inferir tipos via `z.infer<typeof Schema>`.
+- Usar `safeParse` com `Result` pattern, nunca `parse` que lança exceção.
+- Forms: usar `zodResolver` do `@hookform/resolvers/zod`.
+
+## Estado e Data Fetching
+
+- **Server Components** para data fetching quando possível.
+- **React Query** para estado do servidor no cliente.
+- **useState** apenas para estado local simples de UI.
+- **Context** somente para estado global essencial.
+- Proibido prop drilling > 2 níveis.
+
+## TypeScript Strict — Regras
+
+- Proibido `any` — usar `unknown` com type guards quando necessário.
+- Proibido `as` (type assertion) sem comentário justificando.
+- Preferir `interface` para contratos públicos extensíveis.
+- Evitar enums — usar `const` objects com `as const`.
+- Usar `import type` para imports que são apenas tipos.
+- Aplicar `readonly` para propriedades imutáveis.
+
+## Next.js 14 — Regras
+
+- Preferir Server Components; marcar `'use client'` apenas quando necessário.
+- Implementar error boundaries via `error.tsx` e `global-error.tsx`.
+- Usar `loading.tsx` para loading states de páginas.
+- Otimizar imagens com `next/image` — nunca `<img>` direto.
+
+## Segurança e Autenticação
+
+- Middleware para proteção de rotas com NextAuth.js.
+- NUNCA logs com dados pessoais.
+- Sanitização rigorosa de inputs.
+- Environment variables para dados sensíveis — nunca hardcoded.
+- Headers de autenticação via interceptors no HTTP client.
+
+## API e Microsserviços
+
+- React Query keys organizadas por feature: `['users', userId]`.
+- Retry logic configurado nos clients HTTP.
+- Timeout configurado adequadamente.
+- Fallbacks para quando APIs estão indisponíveis.
+- Transformadores de dados entre resposta da API e formato de UI.
+
+## Regras Críticas (Next.js & React)
+
+1. NUNCA usar `'use client'` desnecessariamente.
+2. SEMPRE implementar error boundaries.
+3. OBRIGATÓRIO loading states em operações async.
+4. NECESSÁRIO guard clauses no início de funções.
+5. ESSENCIAL validação com Zod em forms e APIs.
+6. FUNDAMENTAL auxiliary verbs em variáveis boolean.
+7. CRÍTICO early returns para error handling.
+
+## Regras Críticas (Clean Architecture Frontend)
+
+8. JAMAIS violar regra de dependência — camadas internas não dependem de externas.
+9. SEMPRE definir interfaces para API services no Domain Layer.
+10. OBRIGATÓRIO usar Result Pattern para error handling funcional.
+11. ESSENCIAL manter Domain Layer apenas com tipos e contratos.
+12. FUNDAMENTAL organizar código por features, não por camadas técnicas.
+13. PROIBIDO lógica de negócio em componentes UI — delegar ao backend.
+14. OBRIGATÓRIO documentar regras de negócio em arquivos `fe-*.md`.

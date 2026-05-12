@@ -1,0 +1,10 @@
+---
+description: Modo plano (iterar plano) versus ordem explícita de execução de implementação no repositório
+alwaysApply: true
+---
+
+# Modo plano versus execução
+
+- **Modo plano** do Cursor: produzir ou ajustar o **documento do plano** (`.plan.md`, anexos no plano), esclarecer requisitos e registrar decisões. **Não** autoriza, por si só, criar ou alterar código de produção, arquivos de `src/`, nem expandir escopo para “implementar tudo”.
+- **Execução** de implementação no repo exige **ordem explícita** do usuário (ex.: “executar o plano”, “implementar em Agent mode”, “aplicar o plano agora”). Frases ambíguas (“prossiga”, “avança”) tratam-se por defeito como **iteração do plano**, não como disparo de implementação.
+- Ao receber pedidos ambíguos, **confirmar** antes de alterar arquivos fora do plano ou de mudar de modo.

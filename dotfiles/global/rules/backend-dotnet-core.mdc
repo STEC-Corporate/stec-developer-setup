@@ -1,0 +1,13 @@
+---
+description: Convenções .NET Core / ASP.NET Core para APIs e pipeline HTTP
+globs: "**/*.{cs,csproj}"
+alwaysApply: false
+---
+
+# .NET Core / ASP.NET Core (contexto)
+
+- Aplicar quando o contexto envolver `Program.cs`, `appsettings*.json`, controllers ou Minimal APIs.
+- Pipeline de middleware deve ter ordem explícita e consistente (erros, auth, endpoints).
+- Padronizar respostas de erro e versionamento de API quando aplicável.
+- Evitar concentrar toda a configuração em um único `Program.cs` sem extensões por módulo.
+- Esta rule complementa `backend-csharp.mdc`; usar ambas quando necessário.

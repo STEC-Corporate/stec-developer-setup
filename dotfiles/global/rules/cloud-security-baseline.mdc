@@ -1,0 +1,21 @@
+---
+description: Baseline de segurança em infra cloud — segredos, encryption, rede e IAM mínimo.
+globs:
+  - "**/*.tf"
+  - "**/*.tfvars"
+  - "**/*.yml"
+  - "**/*.yaml"
+  - "**/kubernetes/**/*.yaml"
+  - "**/k8s/**/*.yaml"
+alwaysApply: false
+---
+
+# Cloud — segurança baseline
+
+- **Segredos:** nunca valores reais de passwords, tokens ou chaves privadas em repositório. Usar referências a vault, Secret Manager, Key Vault, Parameter Store, ou variáveis de CI injetadas em runtime.
+- **Encryption at rest:** dados sensíveis em discos, bases de dados e buckets com encriptação ativada; CMK/KMS quando a política o exigir.
+- **Rede:** cargas de dados e administração preferencialmente em **sub-redes privadas**; exposição pública só com justificação e endurecimento (TLS, WAF quando aplicável).
+- **IAM / RBAC:** princípio do menor privilégio; evitar `*:*` e políticas administrativas em roles de aplicação.
+- **Contentores:** imagens de registro confiável; scanning de vulnerabilidades na política do org.
+
+Agentes: `cloud-architecture-optimize-guia`, skills `cloud-{provedor}-identity-security`.

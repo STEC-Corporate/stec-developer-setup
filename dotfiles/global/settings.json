@@ -1,0 +1,10 @@
+{
+  "plugins": {
+    "parallel": {
+      "enabled": true
+    },
+    "cursor-team-kit": {
+      "enabled": true
+    }
+  }
+}

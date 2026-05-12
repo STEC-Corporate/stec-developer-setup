@@ -1,0 +1,12 @@
+---
+description: Convenções React Native (código sob src/ e App na raiz do pacote)
+globs: "**/src/**/*.{tsx,ts,jsx,js}"
+alwaysApply: false
+---
+
+# React Native (contexto)
+
+- Incluir também `App.{tsx,ts,jsx,js}` na raiz do pacote mobile se o repo não usar pasta `src/` — ajustar glob no INDEX se necessário.
+- Evitar dependências web-only; verificar compatibilidade com Hermes.
+- Plataforma: usar `Platform.OS` ou arquivos `.android.tsx` / `.ios.tsx` quando o projeto já o faça.
+- Performance: `FlatList`/`SectionList` para listas longas; evitar inline functions pesadas em renderItem sem memo.

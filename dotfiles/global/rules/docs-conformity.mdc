@@ -1,0 +1,37 @@
+---
+description: Cabeçalhos obrigatórios em planos e specs em docs/; alinhamento ao audit e ao TaskLink.
+globs: docs/**/*.md
+---
+
+# Conformidade de documentação (`docs/`)
+
+Antes de concluir edições em Markdown sob `docs/`:
+
+## Planos (`plans-local-templates/**/*.plan.md`, excepto `executados/`)
+
+Nas primeiras **25** linhas, incluir os três tokens (ver [`document-lifecycle.mdc`](./document-lifecycle.mdc)):
+
+- `**Status:**` + estado (EM EXECUÇÃO, CONCLUÍDO, …)
+- `**Iniciado:**` + data `AAAA-MM-DD`
+- `**Origem:**` + path relativo a `docs/` (ou valor normalizado documentado em [`tasklink-conformidade-docs.md`](../../docs/gestao-tarefas/tasklink-conformidade-docs.md))
+
+Não usar `**Iniciado em:**` — o script [`scripts/audit-docs-conformity.sh`](../../scripts/audit-docs-conformity.sh) não reconhece.
+
+## Especificação produto (`gestao-tarefas/03-especificacao-produto/`)
+
+Para `fe-*.md`, `*-mapping.md`, `*-user-flow.md` e `ui-canonical/*.md` (excepto README/INDEX/_model): `**Estado:**`, `**Verificado:**`, `**Data:**` no topo. Pastas canônicas apenas: `business-rules/`, `user-flows/`, `api-specifications/`, `ui-canonical/`.
+
+## Verificação local
+
+```bash
+bash scripts/verify-docs-process.sh
+bash scripts/audit-docs-conformity.sh --fail-on-changed origin/main
+```
+
+## CI
+
+Com variável de repositório `DOCS_AUDIT_STRICT=true`, o workflow **Docs conformity (strict)** falha PRs que alterem `docs/` com violações nos arquivos do diff.
+
+## Hook opcional
+
+`DOCS_HOOK_STRICT=1` — o hook [`after-file-edit.sh`](../skills/hooks/after-file-edit.sh) bloqueia continuação se plano/spec estiver incompleto.

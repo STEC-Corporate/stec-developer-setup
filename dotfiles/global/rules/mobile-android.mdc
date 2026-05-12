@@ -1,0 +1,12 @@
+---
+description: Convenções código nativo Android sob pasta android/
+globs: "**/android/**/*.{kt,kts,java}"
+alwaysApply: false
+---
+
+# Android nativo (contexto)
+
+- Kotlin preferível a Java em código novo, salvo legado documentado.
+- Null-safety e corrotinas conforme versão Kotlin do projeto.
+- Recursos em `res/`; IDs gerados (`R.`) — não duplicar nomes sem querer.
+- Este glob **não** cobre servidores Kotlin (Ktor); para isso criar rule separada se necessário.

@@ -1,0 +1,13 @@
+---
+description: Convenções C# / .NET (geral) quando arquivos .cs estão em contexto
+globs: "**/*.cs"
+alwaysApply: false
+---
+
+# Backend C# / .NET (geral)
+
+- Nullable reference types: tratar avisos; evitar `!` supressor em massa.
+- `async`/`await` em I/O; nomes assíncronos com sufixo `Async` se for convenção do repo.
+- Injeção explícita; evitar service locator estático salvo padrão legado documentado.
+- Imports e usings organizados; seguir `.editorconfig` do projeto se existir.
+- Para práticas específicas de ASP.NET Core (`Program.cs`, middleware, Minimal APIs), usar também a rule `backend-dotnet-core.mdc`.

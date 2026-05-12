@@ -1,0 +1,63 @@
+---
+description: Após toda implementação de código, o agente DEVE rodar testes, verificar tamanho de arquivos e fazer varredura de limpeza/legado. Não considerar a tarefa concluída sem executar este checklist.
+globs:
+alwaysApply: true
+---
+
+# Checklist obrigatório pós-implementação
+
+Após **qualquer** alteração de código (nova feature, correção, refatoração, replicação de perfil), o agente **deve** executar os passos abaixo **antes** de dar a tarefa como concluída. Não pular etapas.
+
+## 1. Rodar todos os testes
+
+- Executar **testes unitários**: `npm run test` (ou `npm run test:unit` se existir).
+- Se houver testes E2E relacionados à área alterada: executar o suite correspondente (ex.: `npm run test:e2e` ou o script de e2e do projeto).
+- **Regra**: Se algum teste falhar, corrigir ou reportar ao usuário; não encerrar como "concluído" com testes falhando (exceto falhas pré-existentes já conhecidas).
+
+**Testes E2E (Playwright):** exigem que o app esteja rodando em `http://localhost:3000`. Antes de rodar `npm run test:e2e` (ou `npx playwright test ...`), iniciar o servidor em outro terminal: `npm run dev`. O global setup do Playwright acessa `/auth/login`; sem o servidor, o setup falha por timeout. Ver `docs/gestao-ideias/04-referencia-tecnica/referencia/dev/estrategia-testes.md` e `docs/gestao-ideias/04-referencia-tecnica/arquivo/testing/README.md`.
+
+## 2. Verificar tamanho dos arquivos
+
+- Usar a skill **check-file-sizes** nos arquivos modificados ou na pasta da feature.
+- Limites do projeto:
+  - Componentes React: **máx. 200 linhas** (`src/**/presentation/components/**/*.tsx`).
+  - Custom Hooks: **máx. 150 linhas** (`src/**/application/hooks/**/*.ts`).
+  - Services: **máx. 300 linhas** (`src/**/application/services/**/*.ts`).
+- Se algum arquivo ultrapassar o limite, informar ao usuário e sugerir refatoração (ou executar se fizer parte do escopo).
+
+## 3. Varredura de limpeza e legado
+
+- **Componentes compartilhados:** Todos os perfis devem usar os mesmos componentes (com adaptações de nomes/parâmetros). Não duplicar views ou breadcrumb (ex.: se o layout já renderiza breadcrumb, a view não deve renderizar de novo). Ver `.cursor/plans/README.md` (Convenções).
+- **Imports**: Remover imports não utilizados nos arquivos alterados.
+- **Código morto**: Verificar funções, variáveis ou blocos que não são mais usados e removê-los (ou marcar para o usuário).
+- **Legado**: Verificar se a implementação deixou código duplicado, componentes obsoletos ou referências a arquivos/APIs antigos que possam ser removidos ou consolidados.
+- **Console/DEBUG**: Remover ou substituir `console.log` / `console.debug` deixados por engano (exceto os explicitamente pedidos para diagnóstico).
+- **Linter / compilador**: Rodar o linter nos arquivos alterados e corrigir erros e warnings (`npm run lint`). Após refatorar **`src/components/headers/`**, usar também `npm run lint:headers`. Para validação de tipos e imports em todo o projeto: `npm run typecheck` (quando o repo estiver verde). Ver `docs/gestao-ideias/04-referencia-tecnica/referencia/dev/estrategia-testes.md` (seção *Validação pós-refatoração*).
+
+## 3.5 Documentação alinhada à implementação (user-flow / ui-canonical)
+
+Quando a alteração **não** é só interna (mudou **UI**, **rotas/`href` visíveis ao usuário**, **jornada** ou **regra de produto** documentada):
+
+- Seguir a **matriz** em [`docs/gestao-ideias/00-governanca/fluxo-documentacao-docs.md`](../../docs/gestao-ideias/00-governanca/fluxo-documentacao-docs.md) (seções **8** e **9**): não é obrigatório atualizar `user-flows`, `ui-canonical` e `mapping` em todos os commits — atualizar a **camada certa** ou registrar follow-up explícito.
+- **Telas template (músico)** com inventário em `docs/gestao-tarefas/03-especificacao-produto/ui-canonical/`: se a estrutura da tela mudou, atualizar o `.md` correspondente **ou** documentar divergência / issue de follow-up antes de dar a tarefa como concluída.
+- **Evitar duplicação**: `fe-*-mapping.md` não deve repetir tabelas de rotas se já existir `ui-canonical` para a mesma tela; preferir link ao canônico (ver fluxo-documentacao-docs §8.3).
+
+## 4. Verificação visual e paridade entre perfis
+
+- **Imagens de referência:** Se o usuário fornecer capturas da tela de referência (ex.: músico), comparar a implementação com a imagem (mesmo layout, mesmos blocos, mesmas abas, mesmo texto de botões/abas).
+- **Mesmos componentes e esqueleto:** Entre perfis (ex.: músico e Profissional Visual), usar os **mesmos** componentes e PageShell (não criar view duplicada por perfil). Parametrizar por `projectId`/rota quando necessário.
+- **Testes E2E/visuais:** Rodar testes E2E que cobrem a área alterada (ex.: `tests/e2e/visual-projects-routes-smoke.spec.ts` para rotas Visual). Servidor deve estar rodando (`npm run dev`) antes de `npm run test:e2e`.
+
+## 5. Resumo ao usuário
+
+Ao finalizar, incluir na resposta:
+- Se os testes passaram (e qual comando foi executado).
+- Se a verificação de tamanho foi feita e se há arquivos acima do limite.
+- Se foi feita limpeza (imports, código morto, console) e se algo ficou pendente (ex.: legado para remover em outro momento).
+- Se houve mudança de UI/rota/jornada: se a documentação (`ui-canonical` / `user-flows`) foi atualizada ou se ficou **follow-up** explícito (seção 3.5).
+
+---
+
+**Skills relacionadas**: `check-file-sizes`, `review-code-soundlink`, `validate-guardrails`, `validate-screen-against-canonical` (quando aplicável a telas template).  
+**Referência**: `docs/gestao-ideias/00-governanca/fluxo-documentacao-docs.md` (seções 8–9 — pós-alteração e quantidade de docs); `docs/gestao-ideias/04-referencia-tecnica/_templates/feature-checklist.md` (Fase 4 – Validação Final).
+

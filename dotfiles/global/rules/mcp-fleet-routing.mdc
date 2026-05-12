@@ -1,0 +1,48 @@
+---
+description: Roteamento da fleet MCP (RAG + Inspectors) — ordem, gatilhos e anti-padrões no Cursor
+globs:
+alwaysApply: false
+---
+
+# Roteamento MCP: RAG + Code + Product + Project
+
+## Quando aplicar
+
+Use esta rule quando o workspace tiver os MCPs configurados em `~/.cursor/mcp.json` ou `.cursor/mcp.json` e a tarefa puder se beneficiar de **mais de uma** fonte (documentação, qualidade de código, produto, saúde do repo).
+
+A fonte de verdade detalhada é [docs/mcp-fleet-contract.md](../../docs/mcp-fleet-contract.md) neste repositório (RAG-Orchestrator) ou uma cópia no projeto consumidor.
+
+## Complemento a `rag-docs-context`
+
+- Continue a usar [.cursor/rules/rag-docs-context.mdc](./rag-docs-context.mdc) para **quais documentos** trazer por intenção (mapeamento SoundLink / estrutura de `docs/`).
+- Use **esta** rule para decidir **qual ferramenta MCP** chamar além do recall documental.
+
+## Ordem padrão
+
+1. **`rag_query`** (`workspace-rag`) — convenções, guardrails, skills, North Star indexados.
+2. Ferramentas **`quality-ollama`** (MCP-Code-Inspector) — código ou diff em foco.
+3. **`product-inspector`** — escopo de produto, negócio, North Star como *análise* sobre texto fornecido.
+4. **`project-inspector`** — estrutura, CI, dependências.
+
+## Gatilhos rápidos
+
+| Pergunta / tipo de trabalho | MCP prioritário |
+|----------------------------|-----------------|
+| “O que diz o repo sobre X?” / guardrails | `workspace-rag` |
+| “Este diff está ok?” / cheiro de código | `quality-ollama` |
+| “Isso alinha com visão / regras de negócio?” | `product-inspector` |
+| “O repo está organizado? CI?” | `project-inspector` |
+
+## Atalhos
+
+- Pergunta só documental: apenas RAG.
+- Micro-refactor com contexto já na conversa: pode pular RAG se não houver risco de violar política documentada — quando em dúvida, **uma** `rag_query` curta primeiro.
+
+## Anti-padrões
+
+- Não substituir leitura de políticas críticas em `docs/` ou `.cursor/rules/` por apenas Product-Inspector: o Inspector analisa o **payload**; o RAG recupera o **índice** do workspace.
+- Não encadear os quatro MCPs em toda interação (custo e latência).
+
+## Nomes estáveis no JSON
+
+Preferir chaves: `workspace-rag`, `quality-ollama`, `product-inspector`, `project-inspector` (ver contrato).

@@ -1,0 +1,12 @@
+---
+description: Convenções TypeScript/React quando .ts ou .tsx estão em contexto
+globs: "**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# TypeScript / React (contexto)
+
+- Tipar props e retornos públicos; evitar `any`.
+- Componentes focados; extrair hooks quando lógica se repetir.
+- Respeitar estrutura de pastas do projeto (features vs camadas).
+- Acessibilidade: labels, roles e teclado quando UI interativa.

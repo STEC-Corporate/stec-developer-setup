@@ -1,0 +1,11 @@
+---
+description: Orientação de arquitetura (Sagas e orquestração) quando documentação em docs está em foco.
+globs: docs/**/*.md
+alwaysApply: false
+---
+
+# Sagas e orquestração
+
+- Este arquivo reforça decisões arquiteturais alinhadas a **SDD**; ver [00-sdd-governance.mdc](00-sdd-governance.mdc).
+- Para detalhe operacional do tema, preferir o agent **[arch-sagas-orquestracao-guia](../agents/arch-sagas-orquestracao-guia.md)**.
+- Não substituir revisão humana de arquitetura ou aprovação de produto.

@@ -1,0 +1,75 @@
+---
+description: Clean Architecture para o frontend Next.js — camadas, estrutura de features, limites de tamanho e padrões de código específicos deste template
+globs: "src/**/*.ts,src/**/*.tsx"
+alwaysApply: false
+---
+
+# Clean Architecture — Frontend SoundLink Template
+
+## Camadas do Frontend
+
+```
+Domain     → types, interfaces, validations, fe-*.md
+Application → services, hooks, transformers, state/context
+Infrastructure → clients, config, utilities
+Presentation → app/ (pages), components/, forms/
+```
+
+- **Domain Layer**: apenas tipos e contratos — sem lógica de negócio.
+- **Application Layer**: orquestra chamadas a APIs e encapsula lógica de aplicação via hooks.
+- **Infrastructure Layer**: HTTP clients, endpoints, utilitários técnicos.
+- **Presentation Layer**: componentes React, páginas Next.js, estado local de UI.
+
+## Regras de Dependência (invioláveis)
+
+- Camadas internas **nunca** dependem de camadas externas.
+- Proibido lógica de negócio em componentes UI — delegar ao backend.
+- Proibido import direto de clients HTTP em componentes — passar por hooks/services.
+
+## Organização por Feature (obrigatório)
+
+```
+src/features/<feature>/
+  domain/
+    types/<feature>.types.ts
+    interfaces/<feature>-api.interface.ts
+    validations/<feature>.validations.ts
+    fe-<feature>-rules.md
+  application/
+    services/<feature>-api.service.ts
+    hooks/use-<feature>.ts
+    transformers/<feature>-data.transformer.ts
+    state/<feature>.context.ts
+  infrastructure/
+    clients/<feature>-http.client.ts
+    config/<feature>-endpoints.config.ts
+  presentation/
+    components/<feature>-form.tsx
+```
+
+## Limites de Tamanho
+
+- Componentes React: **máximo 200 linhas** (`src/**/**/components/**/*.tsx`).
+- Custom Hooks: **máximo 150 linhas** (`src/**/**/hooks/**/*.ts`).
+- API Services: **máximo 300 linhas** (`src/**/**/services/**/*.ts`).
+
+## Estrutura de Pastas Raiz (src/)
+
+| Pasta | Camada | Uso |
+|-------|--------|-----|
+| `app/` | Presentation | Pages e layouts (Next.js App Router) |
+| `components/` | Presentation | Componentes React por funcionalidade |
+| `hooks/` | Application | Custom hooks reutilizáveis |
+| `lib/` | Infrastructure | Utilitários, configurações, helpers |
+| `types/` | Domain | Definições TypeScript centralizadas |
+| `providers/` | Application | Context providers e state management |
+| `services/` | Application | API services e comunicação com microsserviços |
+| `clients/` | Infrastructure | HTTP clients para APIs externas |
+
+## Sinais de Violação
+
+- Import de `prisma` fora de `infrastructure/`
+- Regra de negócio em componente de UI
+- Hook com mais de 150 linhas
+- Componente com mais de 200 linhas
+- Dados de API expostos diretamente na UI sem transformação

@@ -1,0 +1,11 @@
+---
+description: Convenções Svelte / SvelteKit quando arquivos correspondentes estão em foco.
+globs: **/*.{svelte,ts}
+alwaysApply: false
+---
+
+# Svelte / SvelteKit
+
+- Preferir padrões idiomáticos do Svelte / SvelteKit; evitar misturar estilos de outros frameworks no mesmo módulo.
+- Alinhar alterações de comportamento a **user stories** / **regras de negócio** em `docs/produto/fluxo/` (ver `00-sdd-governance.mdc`).
+- Para decisão macro de stack, envolver **[stack-typescript-guia](../agents/stack-typescript-guia.md)**.

@@ -1,0 +1,35 @@
+---
+description: >-
+  Quando TaskLink é fonte de verdade: não criar/editar/promover ideias ou intake
+  em Markdown local sem fluxo TaskLink; usar travas (hook + variáveis) e skill de enforcement.
+globs:
+  - docs/gestao-ideias/**
+  - docs/gestao-tarefas/**
+alwaysApply: false
+---
+
+# TaskLink — travas de gestão de ideias e tarefas
+
+## Quando esta regra aplica
+
+- O projeto adoptou **modo exigente** (`TASKLINK_DOC_LOCK=soft` ou `strict`, ou política de equipe explícita).
+- Estás a editar arquivos sob `docs/gestao-ideias/` ou `docs/gestao-tarefas/` (excepto o que estiver explicitamente isento na equipe).
+
+## Obrigações do agente
+
+1. **Não** criar nem editar ideias, intake ou planos em `01-exploracao/`, `02-execucao/`, `01-intake-ideias/`, `02-triagem-refinamento/` **sem** o usuário confirmar que a alteração veio do **TaskLink** (ou que `TASKLINK_DOC_LOCK=off`).
+2. Preferir pedir **ID de ideia / link TaskLink** antes de reflectir mudanças em Markdown.
+3. Para especificação de produto em `03-especificacao-produto/`, seguir sempre [document-lifecycle.mdc](mdc:.cursor/rules/document-lifecycle.mdc) e alinhar ao código.
+4. Planos `.plan.md` em `02-execucao/planejamento/plans-local-templates/` devem cumprir o gate strict (**Iniciado:**, **Origem:**) — ver [docs-conformity.mdc](mdc:.cursor/rules/docs-conformity.mdc) e [`tasklink-conformidade-docs.md`](../../docs/gestao-tarefas/tasklink-conformidade-docs.md).
+
+## Hierarquia
+
+- **STEC Corporate** (holding) detém projetos de software; ideias sem projeto ficam no backlog da holding até serem movidas (`POST /ideas/:id/move` no TaskLink — ver doc 28 no repositório TaskLink).
+
+## Referências
+
+- `docs/gestao-tarefas/tasklink-travas-repos.md`
+- `docs/gestao-tarefas/tasklink-gestao-tarefas.md`
+- `docs/gestao-tarefas/tasklink-conformidade-docs.md`
+- Skill: `tasklink-enforcement-ideias`
+- Regra: [docs-conformity.mdc](mdc:.cursor/rules/docs-conformity.mdc)

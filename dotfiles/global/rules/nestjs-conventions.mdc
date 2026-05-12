@@ -1,0 +1,49 @@
+---
+description: Convencoes NestJS obrigatorias nos backends da holding STEC
+globs: "apps/*/src/**/*.ts"
+alwaysApply: false
+---
+
+# Convenções NestJS — Holding STEC
+
+## Estrutura de módulos
+
+- Um módulo por bounded context/feature.
+- Módulo raiz (`AppModule`) apenas importa módulos de feature; sem lógica própria.
+- Proibido importar repositórios ou services de outros módulos diretamente — usar interfaces.
+
+## Controllers
+
+- Apenas roteamento e validação de entrada (DTOs).
+- Sem lógica de negócio — delegar para use-cases/services.
+- Sempre usar `@ApiTags`, `@ApiOperation` e `@ApiResponse` (Swagger obrigatório).
+- Retornar DTOs de resposta, nunca entidades de domínio diretamente.
+
+## Services e Use Cases
+
+- Services orquestram use-cases; use-cases contêm a lógica de negócio.
+- Injetar dependências via construtor com interfaces (não classes concretas).
+- Usar `Result<T>` para retornos (sucesso/falha tipada).
+
+## DTOs
+
+- Validar com `class-validator` (decorators `@IsString`, `@IsEmail`, etc.).
+- Transformar com `class-transformer` (`@Transform`, `@Type`).
+- Nomenclatura: `Create{Entity}Dto`, `Update{Entity}Dto`, `{Entity}ResponseDto`.
+
+## Guards e autenticação
+
+- Usar `@UseGuards(JwtAuthGuard)` em todos os endpoints protegidos.
+- Roles via `@Roles(UserRole.ADMIN)` + `RolesGuard`.
+- Nunca colocar lógica de auth dentro de controllers.
+
+## Exception handling
+
+- Usar filtros globais (`HttpExceptionFilter`).
+- Mapear erros de domínio para `HttpException` nos controllers.
+- Nunca expor stack trace ou mensagens internas em produção.
+
+## Health check
+
+- Todo microsserviço deve expor `GET /health` via `@nestjs/terminus`.
+- Incluir checks de banco de dados e dependências críticas.

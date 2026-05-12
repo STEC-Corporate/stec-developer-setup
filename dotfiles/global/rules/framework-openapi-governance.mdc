@@ -1,0 +1,11 @@
+---
+description: Convenções OpenAPI — governação quando arquivos correspondentes estão em foco.
+globs: **/*.{yaml,yml,json}
+alwaysApply: false
+---
+
+# OpenAPI — governação
+
+- Preferir padrões idiomáticos do OpenAPI — governação; evitar misturar estilos de outros frameworks no mesmo módulo.
+- Alinhar alterações de comportamento a **user stories** / **regras de negócio** em `docs/produto/fluxo/` (ver `00-sdd-governance.mdc`).
+- Para decisão macro de stack, envolver **[stack-openapi-guia](../agents/stack-openapi-guia.md)**.

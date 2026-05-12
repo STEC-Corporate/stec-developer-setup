@@ -1,0 +1,14 @@
+{
+  "content_source": "neutral_pack_only",
+  "project_name": "{{PROJECT_NAME}}",
+  "repo_url": "{{REPO_URL}}",
+  "forbidden_globs": [
+    "docs/gestao-tarefas/03-especificacao-produto/**/fe-*.md",
+    "docs/gestao-tarefas/03-especificacao-produto/ui-canonical/**/*.md",
+    "docs/gestao-ideias/02-execucao/planejamento/plans-local-templates/**/*.plan.md"
+  ],
+  "profiles": [],
+  "p0_require_tasklink_hook": false,
+  "tasklink_doc_lock_expected": "any",
+  "p0_env_source": "user_declared"
+}

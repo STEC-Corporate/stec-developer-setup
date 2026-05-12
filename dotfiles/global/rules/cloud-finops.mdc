@@ -1,0 +1,21 @@
+---
+description: FinOps em IaC — etiquetas, custo recorrente e revisão antes de merge em alterações de infra.
+globs:
+  - "**/*.tf"
+  - "**/*.tfvars"
+  - "**/azuredeploy.json"
+  - "**/*.bicep"
+  - "**/Pulumi.yaml"
+  - "**/Pulumi.yml"
+alwaysApply: false
+---
+
+# Cloud — FinOps
+
+- Alterações que criem ou redimensionem recursos **faturáveis** devem incluir **etiquetas** alinhadas à política da organização (`Environment`, `Project`/`CostCenter`, `Owner` quando aplicável).
+- Preferir **dimensionamento** justificado (métricas, testes de carga) a tamanhos fixos grandes “por precaução”.
+- Evitar recursos **órfãos** (volumes, IPs elásticos, snapshots sem lifecycle).
+- Custos apresentados por IA ou calculadora são **estimativas** até validação (Infracost, export oficial, ou API de billing). Não confundir com fatura.
+- Para decisão de **reservas / savings plans / commits**, documentar prazo de lock-in e risco de subutilização.
+
+Ver também [00-sdd-governance.mdc](00-sdd-governance.mdc) se a mudança afetar ambiente ou contrato. Agent: [cloud-finops-guia](../agents/cloud-finops-guia.md).

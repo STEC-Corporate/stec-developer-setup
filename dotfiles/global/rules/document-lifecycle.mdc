@@ -1,0 +1,96 @@
+---
+description: Ciclo de vida completo de documentos — da ideia ao produto final. Todo agente DEVE seguir este processo fechado.
+globs:
+alwaysApply: true
+---
+
+# Ciclo de vida de documentos — processo fechado
+
+Todo trabalho segue um ciclo com **começo, meio e fim**. Os agentes DEVEM verificar e manter este ciclo.
+
+**Neste repositório (paths numerados em `docs/`):** a especificação canônica de produto (BR, user-flows, API, UI canônica) vive em **`docs/gestao-tarefas/03-especificacao-produto/`**. As fases IDEIA e EXECUÇÃO correspondem a `docs/gestao-ideias/01-exploracao/` e `docs/gestao-ideias/02-execucao/`.
+
+## Visão geral do processo
+
+```
+IDEIA                        EXECUÇÃO                       PRODUTO (fonte de sprints)                    DESTINO FINAL
+─────                        ────────                       ──────────────────────────                    ─────────────
+gestao-ideias/01-exploracao/ ──► gestao-ideias/02-execucao/ ──► gestao-tarefas/03-especificacao-produto/ ──► referencia/ ou arquivo/
+                                          │                               ↕                              ↑
+                                          │                  ui-canonical/ (espelho do código)           │
+                                          └──────────────────────────────────────────────────────────────┘
+```
+
+## 1. Fase IDEIA → `gestao-ideias/01-exploracao/`
+
+O usuário tem uma ideia ou identifica uma necessidade. Salva como markdown em `docs/gestao-ideias/01-exploracao/`.
+- Sem compromisso de entrega
+- Sem formato obrigatório
+- Agentes podem ler mas NÃO executar
+
+## 2. Fase EXECUÇÃO → `gestao-ideias/02-execucao/`
+
+Quando a ideia é aprovada para implementação:
+
+1. **Mover** de `gestao-ideias/01-exploracao/` para `gestao-ideias/02-execucao/planejamento/plans-local-templates/`
+2. **Renomear** para `.plan.md`
+3. **Adicionar cabeçalho**:
+   ```markdown
+   > **Status:** EM EXECUÇÃO | **Iniciado:** AAAA-MM-DD | **Origem:** exploracao/...
+   ```
+4. **Durante a implementação**, atualizar simultaneamente os docs em `docs/gestao-tarefas/03-especificacao-produto/`:
+   - `business-rules/` — regras de negócio da feature
+   - `user-flows/` — jornada do usuário
+   - `api-specifications/` — endpoints e contratos
+   - `ui-canonical/` — inventário da UI quando aplicável
+
+**Regra crítica**: `docs/gestao-tarefas/03-especificacao-produto/` DEVE refletir a realidade do código. Se algo está implementado, o doc deve dizer isso. Se algo está planejado, deve estar marcado como `[PLANEJADO]`.
+
+## 3. Fase PRODUTO → `docs/gestao-tarefas/03-especificacao-produto/` (fonte de sprints)
+
+Após a implementação no template, os docs em `docs/gestao-tarefas/03-especificacao-produto/` tornam-se a **especificação autoritativa**:
+- São a **fonte** para gerar sprints do frontend oficial, BFF, backend e API
+- Devem ter **cabeçalho de estado** indicando se o conteúdo está verificado contra o código
+- O sócio/dev que fizer `git pull` sabe exatamente o que está implementado e o que falta
+
+### Cabeçalho obrigatório em docs de `docs/gestao-tarefas/03-especificacao-produto/`
+
+```markdown
+> **Estado:** IMPLEMENTADO NO TEMPLATE | **Verificado:** Sim | **Data:** AAAA-MM-DD
+```
+
+Estados válidos:
+- `IMPLEMENTADO NO TEMPLATE` — código existe em `src/features/` e doc reflete a realidade
+- `ESQUELETO` — estrutura básica existe no código mas lógica incompleta
+- `PLANEJADO` — sem código correspondente, doc é especificação futura
+- `DIVERGENTE` — código existe mas doc não foi verificado/atualizado
+
+### Atualização de `ui-canonical/`
+
+Quando uma feature é implementada ou alterada, `docs/gestao-tarefas/03-especificacao-produto/ui-canonical/` DEVE ser atualizado para espelhar o código — é a "foto" da tela real.
+
+## 4. Fase CONCLUSÃO → destino final
+
+Quando o plano em `gestao-ideias/02-execucao/` está 100% concluído:
+
+1. **Analisar** o conteúdo do plano:
+   - Contém processos/padrões reutilizáveis → `gestao-ideias/04-referencia-tecnica/referencia/`
+   - Contém decisão formal → `gestao-ideias/00-governanca/decisoes/`
+   - É registro histórico → `gestao-ideias/02-execucao/planejamento/plans-local-templates/executados/`
+2. **Mover** para o destino
+3. **Os docs de `docs/gestao-tarefas/03-especificacao-produto/` permanecem** — são permanentes enquanto a feature existir
+
+## 5. Verificações automáticas
+
+Em qualquer interação com documentos:
+
+- Doc em `gestao-ideias/01-exploracao/` com tarefas `in_progress` → deveria estar em `gestao-ideias/02-execucao/`. Alertar.
+- Doc em `gestao-ideias/02-execucao/` com tudo `completed` → pronto para destino final. Propor transição.
+- Doc em `docs/gestao-tarefas/03-especificacao-produto/` sem cabeçalho de estado → adicionar cabeçalho.
+- Doc em `docs/gestao-tarefas/03-especificacao-produto/` marcado como `IMPLEMENTADO` com data >90 dias → sugerir re-verificação.
+
+## Referências
+
+- Skill de transição: `.cursor/skills/docs-transicao-ciclo-vida/SKILL.md`
+- Política de classes: `docs/gestao-ideias/00-governanca/politica-classes-estado-documentacao.md`
+- Fluxo de documentação: `docs/gestao-ideias/00-governanca/fluxo-documentacao-docs.md`

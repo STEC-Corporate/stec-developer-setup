@@ -1,0 +1,11 @@
+---
+description: Convenções Dropwizard quando arquivos correspondentes estão em foco.
+globs: **/src/main/java/**/*.java
+alwaysApply: false
+---
+
+# Dropwizard
+
+- Preferir padrões idiomáticos do Dropwizard; evitar misturar estilos de outros frameworks no mesmo módulo.
+- Alinhar alterações de comportamento a **user stories** / **regras de negócio** em `docs/produto/fluxo/` (ver `00-sdd-governance.mdc`).
+- Para decisão macro de stack, envolver **[stack-java-guia](../agents/stack-java-guia.md)**.

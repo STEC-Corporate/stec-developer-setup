@@ -1,0 +1,20 @@
+---
+description: Após alterar código — correr testes/lint/typecheck quando existirem; não encerrar tarefa com falhas conhecidas.
+globs:
+  - "**/*.{ts,tsx,js,jsx,mjs,cjs}"
+  - "**/*.java"
+  - "**/*.py"
+  - "**/*.{cs,csproj}"
+  - "**/package.json"
+  - "**/pom.xml"
+  - "**/pyproject.toml"
+alwaysApply: false
+---
+
+# Qualidade pós-implementação (Agent)
+
+- Depois de **alterações de código** que mudem comportamento ou contratos, **executar** no terminal os scripts que o repositório expõe (ex.: `npm run test`, `npm run lint`, `npm run typecheck`, `mvn test`, `dotnet test`, `pytest`) quando existirem.
+- **Não** declarar a tarefa como concluída com testes ou lint a falhar, salvo falhas **pré-existentes** já documentadas pelo usuário.
+- **E2E / Playwright:** só quando fizer parte do escopo e o projeto documentar pré-requisitos (ex.: app em `localhost`); caso contrário, indicar follow-up.
+- Alinhar mudanças de comportamento a **user story / regras de negócio** em `docs/produto/fluxo/` quando aplicável: ver [00-sdd-governance.mdc](00-sdd-governance.mdc).
+- Fluxo operacional completo (hooks, CI, fecho de tarefa): [fluxo-workflow-agent-hooks-ci.md](../../docs/governanca/fluxo-workflow-agent-hooks-ci.md). Skill: [workflow-cursor-agent-entrega](../skills/workflow-cursor-agent-entrega/SKILL.md).

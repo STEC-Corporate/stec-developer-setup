@@ -1,0 +1,12 @@
+---
+description: Alinhar geração de artefatos ao architecture-profile quando houver módulo em foco.
+globs: **/*
+alwaysApply: false
+---
+
+# Architecture Profile
+
+- Quando existir `architecture-profile.yaml` na raiz (ou equivalente documentado), usar como fonte de verdade para `stack`, `styles` e `artifacts_enabled`.
+- Não gerar artefato fora de `artifacts_enabled` sem confirmação explícita do usuário.
+- Em conflito entre pedido e perfil, priorizar segurança: explicar risco e pedir decisão.
+- A ausência de profile exige fallback para `arch-*-guia` + `stack-*`, com validação humana antes de mudanças estruturais.

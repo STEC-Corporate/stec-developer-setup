@@ -1,0 +1,25 @@
+---
+description: Preferir a solucao mais simples e evolutiva antes de aplicar boilerplates ou padroes pesados
+globs: "**/*"
+alwaysApply: true
+---
+
+# Simplicidade primeiro
+
+- Antes de propor ou implementar uma solucao, avaliar explicitamente o caminho mais simples que atenda ao requisito com seguranca, clareza e capacidade de evolucao.
+- Nao aplicar boilerplate, camadas, abstractions ou padroes de mercado apenas por familiaridade ou moda.
+- Evitar solucoes que exijam editar muitos ficheiros, gerar estruturas extensas ou introduzir complexidade operacional sem ganho proporcional.
+- Considerar os `agents` e `skills` de stack/framework como catalogo de opcoes para comparar abordagens, nao como obrigacao de usar a opcao mais robusta ou mais completa.
+- Quando houver mais de uma abordagem viavel, priorizar nesta ordem:
+  1. menor complexidade acidental;
+  2. menor numero de ficheiros e pontos de manutencao;
+  3. melhor aderencia ao padrao ja existente no repositorio;
+  4. evolucao incremental sem bloquear refatoracao futura.
+- Se uma arquitetura mais sofisticada for realmente necessaria, justificar claramente o motivo, o ganho esperado e por que a opcao simples nao atende.
+- Em revisoes, sinalizar quando uma sugestao introduz complexidade desnecessaria para a feature em foco.
+
+# Resultado esperado
+
+- Solucoes intencionais, pequenas e legiveis.
+- Escolhas de framework e padrao feitas por contexto, nao por default.
+- Explicacao objetiva do trade-off quando a opcao simples nao for a escolhida.
