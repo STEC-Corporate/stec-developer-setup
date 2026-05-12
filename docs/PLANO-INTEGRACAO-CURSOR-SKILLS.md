@@ -1,3 +1,10 @@
+# ⚠️ DEPRECADO — ver `progress.md` e `PLANO-INTEGRACAO-AI-PROJECTDEVELOPER-V2.md`
+
+> Este plano foi superado pela integração v2 (2026-05-11). TODO-1 a TODO-6 estão completos.
+> O catálogo foi migrado para `dotfiles/global/` e o submodule `.cursor` foi removido.
+
+---
+
 # 📋 Plano: Integração de Skills do `.cursor` Submodule aos Dotfiles
 
 ## 🎯 Objetivo

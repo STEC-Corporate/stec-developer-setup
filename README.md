@@ -35,35 +35,41 @@ Com harness, **todo novo projeto têm automaticamente:**
 
 ## 📦 O que será instalado (Distribuição Completa)
 
-A instalação distribui automaticamente hooks, agents, skills, scripts e rules para as 3 IDEs:
+A instalação opera em **duas fases** e distribui 779+ artefatos corporativos para as 3 IDEs:
+
+- **Fase 1:** `dotfiles/global/` → catálogo base corporativo (316 skills, 230 agents, 93 rules)
+- **Fase 2:** `dotfiles/[ide]/` → customizações IDE-específicas (sobrescrevem Fase 1 se conflito)
 
 ### Claude Code (`~/.claude/`)
-| Recurso | Origem | Função |
-|---------|--------|--------|
-| `settings.json` | `dotfiles/claude/` | Hooks PreToolUse, PostToolUse, Stop (Guard-shell + Audit + Auto-progress + Checklist) |
-| `HARNESS.md` | `dotfiles/claude/` | Referência conceitual |
-| `scripts/harness-apply.sh` | `dotfiles/claude/scripts/` | Aplica harness universal (Claude+Cursor+Codex) em projetos |
-| `scripts/typecheck-hook.sh` | `dotfiles/claude/scripts/` | Hook TypeScript |
-| `scripts/progress-update.sh` | `dotfiles/claude/scripts/` | Atualiza `progress.md` automaticamente |
-| `templates/` | `templates/` | Templates Python, Node, Java, generic |
+| Recurso | Qtd | Origem | Função |
+|---------|-----|--------|--------|
+| `skills/` | 316 | `dotfiles/global/skills/` | Catálogo completo AI-ProjectDeveloper |
+| `rules/` | 93 | `dotfiles/global/rules/` | Rules MDC corporativas |
+| `mcp/` | 2 | `dotfiles/global/mcp/` | Templates de configuração MCP |
+| `settings.json` | — | `dotfiles/claude/` | Hooks PreToolUse, PostToolUse, Stop |
+| `HARNESS.md` | — | `dotfiles/claude/` | Referência conceitual |
+| `scripts/` | 5 | `dotfiles/claude/scripts/` + `global/scripts/` | harness-apply, typecheck-hook, progress-update, guard-shell, checklist |
+| `templates/` | 12 | `templates/` | Templates Python, Node, Java, generic |
 
 ### Cursor IDE (`~/.cursor/`)
-| Recurso | Origem | Função |
-|---------|--------|--------|
-| `hooks.json` | `dotfiles/cursor/` | Hooks beforeShellExecution, afterFileEdit, stop |
-| `HARNESS.md` | `dotfiles/cursor/` | Referência conceitual |
-| `agents/` (8 agents) | `dotfiles/cursor/agents/` | harness-apply, java/kotlin/nestjs/nextjs/python/react/react-native especialistas |
-| `skills/` (12 skills) | `dotfiles/cursor/skills/` | gates (arquitetura/ci/segurança/testes) + workflows-base por stack |
-| `scripts/` (4 scripts) | `dotfiles/cursor/scripts/` | guard-shell, progress-update, checklist, harness-apply |
+| Recurso | Qtd | Origem | Função |
+|---------|-----|--------|--------|
+| `skills/` | 316 | `dotfiles/global/skills/` | Catálogo completo AI-ProjectDeveloper |
+| `agents/` | 230 | `dotfiles/global/agents/` | Agentes corporativos (arch, code, security, etc.) |
+| `rules/` | 93 | `dotfiles/global/rules/` | Rules MDC corporativas |
+| `hooks.json` | — | `dotfiles/cursor/` | Hooks beforeShellExecution, afterFileEdit, stop |
+| `HARNESS.md` | — | `dotfiles/cursor/` | Referência conceitual |
+| `scripts/` | 6 | `dotfiles/cursor/scripts/` + `global/scripts/` | guard-shell, progress-update, checklist, harness-apply |
 
 ### Codex CLI (`~/.codex/`)
-| Recurso | Origem | Função |
-|---------|--------|--------|
-| `HARNESS.md` | `dotfiles/codex/` | Referência conceitual |
-| `instructions.md` | `dotfiles/codex/` | Instruções automáticas |
-| `skills/` (2 skills) | `dotfiles/codex/skills/` | cursor-agent-orchestrator, cursor-project-standards |
-| `rules/default.rules` | `dotfiles/codex/rules/` | Rules globais |
-| `scripts/` (4 scripts) | `dotfiles/codex/scripts/` | guard-shell, progress-update, checklist, harness-apply |
+| Recurso | Qtd | Origem | Função |
+|---------|-----|--------|--------|
+| `skills/` | 320 | `global/skills/` + `global/codex/skills/` | 316 genéricas + 4 Codex-específicas |
+| `agents/` | 229 | `dotfiles/global/agents/` | Agentes corporativos |
+| `rules/` | 93 | `dotfiles/global/rules/` | Rules MDC corporativas |
+| `HARNESS.md` | — | `dotfiles/codex/` | Referência conceitual |
+| `instructions.md` | — | `dotfiles/codex/` | Instruções automáticas |
+| `scripts/` | 6 | `dotfiles/codex/scripts/` + `global/scripts/` | guard-shell, progress-update, checklist, harness-apply |
 
 ### Home Level
 | Arquivo | Onde vai | O que é |
@@ -373,18 +379,9 @@ bash install.sh                    # Distribui tudo (recursivo)
 bash scripts/validate-install.sh   # Valida paridade IDE ↔ repositório
 ```
 
-O `install.sh` nunca sobrescreve arquivos existentes — apenas instala novos.
+O `install.sh` é **idempotente**: na Fase 1 pula arquivos existentes (seguro rodar múltiplas vezes); na Fase 2 sobrescreve com os overlays customizados. Para atualizar o catálogo completo, basta rodar `bash install.sh` novamente.
 
-O `validate-install.sh` compara recursivamente cada arquivo de `dotfiles/` com o que está em `~/.claude/`, `~/.cursor/` e `~/.codex/`, reportando o que está faltando.
-
-Para **forçar atualização** de arquivos:
-```bash
-# Linux/macOS:
-bash install.sh --force  # (não implementado yet, use cp manual)
-
-# Windows PowerShell:
-.\install.ps1 -Force
-```
+O `validate-install.sh` verifica os 35 arquivos de overlay críticos, reportando presença/ausência em cada IDE.
 
 ---
 
@@ -406,35 +403,43 @@ Para entender o harness profundamente:
 ```
 stec-developer-setup/
 ├── README.md                       # Este arquivo
-├── install.sh                      # Instalador (cópia recursiva)
+├── install.sh                      # Instalador (Fase 1 + Fase 2)
 ├── install.ps1                     # Instalador Windows PowerShell
 ├── scripts/
 │   ├── detect-env.sh               # Detecção de plataforma (sourced)
-│   └── validate-install.sh         # Valida paridade IDE ↔ repo
+│   └── validate-install.sh         # Valida 35 arquivos de overlay críticos
 ├── dotfiles/
+│   ├── global/                     # Catálogo corporativo AI-ProjectDeveloper
+│   │   ├── agents/  (230 agents)   # Agentes arch, code, security, etc.
+│   │   ├── skills/  (316 skills)   # Skills genéricas (Claude + Cursor + Codex)
+│   │   ├── rules/   (93 rules)     # Rules MDC corporativas
+│   │   ├── hooks/                  # Hooks de integração
+│   │   ├── mcp/                    # Templates MCP (.example.json)
+│   │   ├── scripts/                # Scripts corporativos
+│   │   ├── plans/                  # Planos de trabalho
+│   │   ├── docs/   (163 docs)      # Documentação AI-ProjectDeveloper
+│   │   └── codex/
+│   │       └── skills/  (4 skills) # Skills Codex-específicas (sobrescrevem global)
 │   ├── home/
 │   │   └── CLAUDE.md               # ~/CLAUDE.md (instrução global)
-│   ├── claude/                     # Claude Code
+│   ├── claude/                     # Overlay Claude Code (customizações)
 │   │   ├── HARNESS.md
 │   │   ├── settings.json           # Hooks: PreToolUse + PostToolUse + Stop
 │   │   └── scripts/
-│   │       ├── harness-apply.sh    # Universal (Claude+Cursor+Codex)
-│   │       ├── typecheck-hook.sh   # TypeScript hook
-│   │       └── progress-update.sh  # Auto-update progress.md
-│   ├── cursor/                     # Cursor IDE
+│   │       ├── harness-apply.sh
+│   │       ├── typecheck-hook.sh
+│   │       └── progress-update.sh
+│   ├── cursor/                     # Overlay Cursor IDE (customizações)
 │   │   ├── HARNESS.md
-│   │   ├── hooks.json              # Hooks Cursor (beforeShellExecution etc)
-│   │   ├── agents/                 # 8 agents (harness-apply + 7 especialistas)
-│   │   ├── skills/                 # 12 skills (gates + workflows-base)
+│   │   ├── hooks.json              # Hooks Cursor (paths absolutos)
 │   │   └── scripts/
 │   │       ├── guard-shell.sh
 │   │       ├── progress-update.sh
 │   │       ├── checklist.sh
 │   │       └── harness-apply.sh
-│   └── codex/                      # Codex CLI
+│   └── codex/                      # Overlay Codex CLI (customizações)
 │       ├── HARNESS.md
 │       ├── instructions.md
-│       ├── skills/                 # 2 skills
 │       ├── rules/
 │       │   └── default.rules
 │       └── scripts/
@@ -497,6 +502,7 @@ Problemas com o harness?
 |------|---------|
 | 2026-05-06 | v1.0 — Setup inicial com templates 4 stacks, dual-platform (Bash + PowerShell) |
 | 2026-05-10 | v2.0 — Sincronização completa: hooks, agents (8), skills (12+2), scripts e rules para Claude+Cursor+Codex. Adicionado `validate-install.sh` e cópia recursiva no `install.sh`. |
+| 2026-05-11 | v3.0 — Integração AI-ProjectDeveloper: catálogo corporativo (316 skills, 230 agents, 93 rules) migrado para `dotfiles/global/`. `install.sh` reescrito com arquitetura de duas fases. Submodule `.cursor` removido. |
 
 ---
 
@@ -506,6 +512,6 @@ Interno STEC. Não distribuir.
 
 ---
 
-**Última atualização:** 2026-05-06  
+**Última atualização:** 2026-05-11  
 **Manutenção:** Jesus (jesus@soundlink.com)  
-**Status:** ✅ Ativo
+**Status:** ✅ Ativo (v3.0 — AI-ProjectDeveloper integrado)
