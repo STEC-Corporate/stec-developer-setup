@@ -87,8 +87,8 @@ dotfiles/
 ```
 Fase 1: Copia global → home (SOBRESCREVE arquivos existentes)
 ├── ⭐ dotfiles/global/skills/* → ~/.claude/skills/, ~/.cursor/skills/, ~/.codex/skills/ ← Skills para TODOS
+├── ⭐ dotfiles/global/rules/* → ~/.claude/rules/, ~/.cursor/rules/, ~/.codex/rules/ ← Rules para TODOS
 ├── dotfiles/global/agents/* → ~/.cursor/agents/, ~/.codex/agents/
-├── dotfiles/global/rules/* → ~/.cursor/rules/, ~/.codex/rules/
 ├── dotfiles/global/hooks/* → ~/.cursor/hooks.json, ~/.codex/rules/
 └── dotfiles/global/mcp/* → ~/.claude/mcp/
 
@@ -98,7 +98,7 @@ Fase 2: Copia específicas → home (SOBRESCREVE Fase 1 e arquivos existentes)
 └── dotfiles/codex/* → ~/.codex/ (pode conter skills/agents/rules adicionais)
     └── ⭐ codex/skills/* → ~/.codex/skills/ (Skills Codex pré-convertidas, SOBRESCREVEM global/skills se houver conflito)
 
-Resultado Final: Skills globais em TODAS as 3 IDEs + customizações locais específicas (locais sobrescrevem globais)
+Resultado Final: Skills e Rules globais em TODAS as 3 IDEs + customizações locais específicas (locais sobrescrevem globais)
 ```
 
 ### 🔄 Política de Sobrescrita
@@ -127,12 +127,19 @@ Resultado Final: Skills globais em TODAS as 3 IDEs + customizações locais espe
 
 **Referência:** `@docs/ferramentas/Mapeamento-Arquivos-IDEs.md`
 
-⚠️ **IMPORTANTE — Skills são replicadas para as 3 ferramentas:**
+⚠️ **IMPORTANTE — Skills E Rules são replicadas para as 3 ferramentas:**
+
+**Skills:**
 - `dotfiles/global/skills/` → `~/.claude/skills/` ✅ **Claude Code recebe skills**
 - `dotfiles/global/skills/` → `~/.cursor/skills/` ✅ **Cursor IDE recebe skills**
 - `dotfiles/global/skills/` → `~/.codex/skills/` ✅ **Codex CLI recebe skills**
 
-Todos os 3 IDEs recebem o mesmo catálogo de skills em Markdown da pasta `global/skills/`, mais skills específicas de cada IDE em suas pastas overlay (`dotfiles/claude/`, `dotfiles/cursor/`, `dotfiles/codex/`).
+**Rules:**
+- `dotfiles/global/rules/` → `~/.claude/rules/` ✅ **Claude Code recebe rules** (Markdown com frontmatter)
+- `dotfiles/global/rules/` → `~/.cursor/rules/` ✅ **Cursor IDE recebe rules** (formato `.mdc`)
+- `dotfiles/global/rules/` → `~/.codex/rules/` ✅ **Codex CLI recebe rules** (formato `.rules`)
+
+Todos os 3 IDEs recebem o mesmo catálogo de skills e rules em Markdown da pasta `global/`, mais skills/rules específicas de cada IDE em suas pastas overlay (`dotfiles/claude/`, `dotfiles/cursor/`, `dotfiles/codex/`).
 
 ### Origem: dotfiles/global/ → Destino: ~/.claude/, ~/.cursor/, ~/.codex/
 
@@ -140,7 +147,7 @@ Todos os 3 IDEs recebem o mesmo catálogo de skills em Markdown da pasta `global
 |--------------------------------|----------------------|----------------------|---------------------|
 | `agents/` (agents .md) | **Ignorar** (não usa agents nativos) | `agents/` ← cópia direta | `agents/` ← cópia direta |
 | **`skills/**` (SKILL.md genéricos)** | **⭐ `skills/` ← cópia direta** | **⭐ `skills/` ← cópia direta** | **⭐ `skills/` ← cópia direta** |
-| `rules/*.mdc` | Guardrails em CLAUDE.md (política adicional) | `rules/` ← cópia direta | `rules/` ← cópia direta |
+| **`rules/*.mdc`** | **⭐ `rules/` ← cópia direta (Markdown+YAML)** | **⭐ `rules/` ← cópia direta (`.mdc`)** | **⭐ `rules/` ← cópia direta (`.rules`)** |
 | `hooks/` + `hooks.json` | Converter para MCP server config | `hooks.json` ← cópia com **paths absolutos** | Converter para `.rules` DSL |
 | `mcp/` | `mcp/` ← cópia direta | — | — |
 | `plans/` | Opcional (se Claude consumir) | Opcional (se Cursor consumir) | Opcional (se Codex consumir) |
@@ -171,7 +178,14 @@ Todos os 3 IDEs recebem o mesmo catálogo de skills em Markdown da pasta `global
    - ✅ Formato Markdown é nativo para todos os 3 IDEs
    - **Nota:** Claude Code usa skills em Markdown como mecanismo principal de personalização
 
-2. **Agents** (`global/agents/*.md`) — Formato Markdown+YAML
+2. **⭐ Rules** (`global/rules/*.mdc` ou `*.md`) — Formato Markdown+YAML (REPLICADO para 3 IDEs com transformação)
+   - → **Para Claude Code:** Copiar como-é (Markdown+YAML) em `~/.claude/rules/` ✅
+   - → **Para Cursor IDE:** Copiar como-é (`.mdc`) em `~/.cursor/rules/` ✅
+   - → **Para Codex CLI:** Converter para `.rules` DSL em `~/.codex/rules/` 🔄
+   - ✅ Formato Markdown+YAML é nativo para Claude e Cursor
+   - **Nota:** Claude Code usa rules para contexto persistente; Cursor usa `.mdc` nativamente; Codex requer conversão para `.rules`
+
+3. **Agents** (`global/agents/*.md`) — Formato Markdown+YAML
    - → Para Claude: Ignorar (não utiliza agents)
    - → Para Cursor: Copiar como-é em `~/.cursor/agents/`
    - → Para Codex: Copiar como-é em `~/.codex/agents/`
@@ -179,7 +193,7 @@ Todos os 3 IDEs recebem o mesmo catálogo de skills em Markdown da pasta `global
 
 **Recursos que REQUEREM conversão** (transformação necessária):
 
-3. **Hooks** (`global/hooks/`) — Formato JSON, mapeamento diferente por IDE
+4. **Hooks** (`global/hooks/`) — Formato JSON, mapeamento diferente por IDE
    - → Para Claude: Converter para MCP server config em `~/.claude/mcp/`
    - → Para Cursor: Copiar como `hooks.json` em `~/.cursor/hooks.json`
    - → Para Codex: Converter para `.rules` DSL em `~/.codex/rules/`
@@ -216,6 +230,37 @@ copy_recursive_tree "$DOTFILES_DIR/global/skills" "$CLAUDE_CONFIG_DIR/skills" "G
 **Nota:** Diferente de agents (que Claude não usa), skills são **o mecanismo principal** de personalização do Claude Code.
 
 **IMPORTANTE:** Se algum arquivo skill já existir em `~/.claude/skills/`, ele deve ser sobrescrito. Isto garante que atualizações sempre sejam aplicadas.
+
+---
+
+## ⭐ Tratamento Especial: `claude-rules/` (global/rules/)
+
+A pasta `dotfiles/global/rules/` contém um conjunto de **rules em Markdown com frontmatter YAML** que definem diretrizes contextuais persistentes para o Claude Code. Estas rules são formato genérico que funciona diretamente em todas as três IDEs (com formato nativo específico para cada uma).
+
+### Regra de Cópia para Claude Rules
+
+| Origem | Destino | Conversão | Nota |
+|--------|---------|-----------|------|
+| `global/rules/*.mdc` ou `*.md` | `~/.claude/rules/` | **NENHUMA para Claude** | Copiar diretamente com frontmatter YAML, Claude lê Markdown+YAML nativamente |
+
+### Justificativa
+
+- Claude Code utiliza **Rules em Markdown com frontmatter YAML** como mecanismo nativo de contexto persistente
+- Cada rule é um arquivo em `global/rules/{nome}.mdc` ou `.md` contendo YAML frontmatter + Markdown
+- O frontmatter define âmbito (ex.: `globs: "**/*.ts"`, `alwaysApply: true`)
+- Rules são automaticamente descobertas e aplicadas dentro do Claude Code quando presentes em `~/.claude/rules/`
+- Não requer conversão para Claude — o formato Markdown+YAML é nativo
+- Cursor utiliza `.mdc` nativamente; Codex converte para `.rules` DSL (transformação em Fase 2)
+
+### No install.sh
+
+A linha de cópia deve ser (com sobrescrita de arquivos existentes):
+```bash
+copy_recursive_tree "$DOTFILES_DIR/global/rules" "$CLAUDE_CONFIG_DIR/rules" "Global Rules → Claude"
+# A função copy_recursive_tree DEVE usar: cp -r (sem -n)
+```
+
+**IMPORTANTE:** Se algum arquivo rule já existir em `~/.claude/rules/`, ele deve ser sobrescrito. Isto garante que atualizações sempre sejam aplicadas.
 
 ---
 
@@ -556,13 +601,14 @@ copy_from_global() {
     copy_recursive_tree "$DOTFILES_DIR/global/skills" "$CURSOR_CONFIG_DIR/skills" "⭐ Global Skills → Cursor IDE"
     copy_recursive_tree "$DOTFILES_DIR/global/skills" "$CODEX_CONFIG_DIR/skills" "⭐ Global Skills → Codex CLI"
     
+    # ⭐ IMPORTANTE: Rules vão para TODAS as 3 ferramentas
+    copy_recursive_tree "$DOTFILES_DIR/global/rules" "$CLAUDE_CONFIG_DIR/rules" "⭐ Global Rules → Claude Code"
+    copy_recursive_tree "$DOTFILES_DIR/global/rules" "$CURSOR_CONFIG_DIR/rules" "⭐ Global Rules → Cursor IDE"
+    copy_recursive_tree "$DOTFILES_DIR/global/rules" "$CODEX_CONFIG_DIR/rules" "⭐ Global Rules → Codex CLI"
+    
     # Agents vão para Cursor e Codex (Claude não usa agents nativos)
     copy_recursive_tree "$DOTFILES_DIR/global/agents" "$CURSOR_CONFIG_DIR/agents" "Global Agents → Cursor"
     copy_recursive_tree "$DOTFILES_DIR/global/agents" "$CODEX_CONFIG_DIR/agents" "Global Agents → Codex"
-    
-    # Rules vão para Cursor e Codex
-    copy_recursive_tree "$DOTFILES_DIR/global/rules" "$CURSOR_CONFIG_DIR/rules" "Global Rules → Cursor"
-    copy_recursive_tree "$DOTFILES_DIR/global/rules" "$CODEX_CONFIG_DIR/rules" "Global Rules → Codex"
     
     # MCP vai para Claude
     copy_recursive_tree "$DOTFILES_DIR/global/mcp" "$CLAUDE_CONFIG_DIR/mcp" "Global MCP → Claude"
