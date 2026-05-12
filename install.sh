@@ -1,14 +1,14 @@
 #!/bin/bash
 # Instalador Harness — Linux / macOS / WSL2 / Git Bash
-# Distribui hooks, agents, skills, scripts e rules para ~/.claude/, ~/.cursor/, ~/.codex/
-# Suporta cópia recursiva de subdiretórios (skills/, agents/, scripts/, rules/)
+# Duas fases: Fase 1 (dotfiles/global) + Fase 2 (dotfiles/[ide] overlays com sobrescrita)
+# Distribui 779+ artefatos (skills, agents, rules, hooks, mcp, plans) para ~/.claude/, ~/.cursor/, ~/.codex/
 
 set -e
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_DIR="$REPO_DIR/dotfiles"
 
-echo "🚀 Instalando Harness completo (Claude + Cursor + Codex)"
+echo "🚀 Instalando Harness completo — Fase 1 (global) + Fase 2 (overlays)"
 echo "📍 Repositório: $REPO_DIR"
 echo ""
 
@@ -17,16 +17,14 @@ source "$REPO_DIR/scripts/detect-env.sh"
 print_detection
 echo ""
 
-# Função de cópia recursiva preservando estrutura completa
-copy_recursive_tree() {
+# Função de cópia recursiva com opção de sobrescrita
+copy_tree() {
     local SOURCE_DIR=$1
     local DEST_DIR=$2
     local TOOL_NAME=$3
-
-    echo "📦 Instalando para $TOOL_NAME..."
+    local OVERWRITE=${4:-0}  # 0 = skip existentes, 1 = sobrescrever
 
     if [ ! -d "$SOURCE_DIR" ]; then
-        echo "  ⚠️  Fonte não encontrada: $SOURCE_DIR"
         return
     fi
 
@@ -35,7 +33,7 @@ copy_recursive_tree() {
     local COPIED=0
     local SKIPPED=0
 
-    # Encontrar todos os arquivos (qualquer profundidade) e replicar estrutura
+    # Encontrar todos os arquivos e replicar estrutura
     while IFS= read -r -d '' file; do
         local REL_PATH="${file#$SOURCE_DIR/}"
         local DEST_FILE="$DEST_DIR/$REL_PATH"
@@ -43,22 +41,23 @@ copy_recursive_tree() {
 
         mkdir -p "$DEST_PARENT"
 
-        if [ -f "$DEST_FILE" ]; then
+        if [ -f "$DEST_FILE" ] && [ "$OVERWRITE" -eq 0 ]; then
             SKIPPED=$((SKIPPED + 1))
         else
-            cp "$file" "$DEST_FILE"
+            cp "$file" "$DEST_FILE" 2>/dev/null || true
             COPIED=$((COPIED + 1))
-            echo "  ✅ $REL_PATH"
         fi
     done < <(find "$SOURCE_DIR" -type f -print0)
 
-    # chmod +x em todos os .sh dentro de scripts/ e hooks/
+    # chmod +x em scripts/ e hooks/
     find "$DEST_DIR" -path "*/scripts/*.sh" -type f -exec chmod +x {} \; 2>/dev/null || true
     find "$DEST_DIR" -path "*/hooks/*.sh" -type f -exec chmod +x {} \; 2>/dev/null || true
 
-    echo "  📊 $COPIED novo(s), $SKIPPED já existente(s) preservado(s)"
-    echo "  ✅ $TOOL_NAME OK"
-    echo ""
+    if [ "$OVERWRITE" -eq 0 ]; then
+        echo "  📊 $COPIED novo(s), $SKIPPED preservado(s)"
+    else
+        echo "  ✅ Overlay aplicado ($COPIED arquivos)"
+    fi
 }
 
 # Detectar WSL2 e perguntar sobre ferramentas no Windows
@@ -82,46 +81,107 @@ else
     INSTALL_WIN=0
 fi
 
-# Instalar Claude Code (recursivo)
-if [[ "$INSTALL_WSL" == "1" ]]; then
-    copy_recursive_tree "$DOTFILES_DIR/claude" "$CLAUDE_CONFIG_DIR" "Claude Code"
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# FASE 1: Distribuir dotfiles/global/ para 3 IDEs (base + genéricas)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    # Templates (necessário para harness-apply.sh)
-    if [ -d "$REPO_DIR/templates" ]; then
-        echo "📦 Instalando templates Claude..."
-        mkdir -p "$CLAUDE_CONFIG_DIR/templates"
-        cp -rn "$REPO_DIR/templates"/* "$CLAUDE_CONFIG_DIR/templates/" 2>/dev/null || true
-        echo "  ✅ templates/ copiados (sem sobrescrever)"
-        echo ""
+if [[ "$INSTALL_WSL" == "1" ]]; then
+    echo "📋 FASE 1: Distribuindo catálogo corporativo (dotfiles/global/)"
+    echo ""
+
+    # Claude Code — skills + rules + mcp + scripts + docs (NÃO agents — ignorado por Claude)
+    echo "🔹 Claude Code (skills, rules, mcp, scripts)"
+    copy_tree "$DOTFILES_DIR/global/skills" "$CLAUDE_CONFIG_DIR/skills" "Claude skills" 0
+    copy_tree "$DOTFILES_DIR/global/rules" "$CLAUDE_CONFIG_DIR/rules" "Claude rules" 0
+    copy_tree "$DOTFILES_DIR/global/mcp" "$CLAUDE_CONFIG_DIR/mcp" "Claude mcp" 0
+    copy_tree "$DOTFILES_DIR/global/scripts" "$CLAUDE_CONFIG_DIR/scripts" "Claude scripts" 0
+    echo ""
+
+    # Cursor IDE — skills + rules + agents + hooks + scripts
+    echo "🔹 Cursor IDE (skills, rules, agents, hooks, scripts)"
+    copy_tree "$DOTFILES_DIR/global/skills" "$CURSOR_CONFIG_DIR/skills" "Cursor skills" 0
+    copy_tree "$DOTFILES_DIR/global/rules" "$CURSOR_CONFIG_DIR/rules" "Cursor rules" 0
+    copy_tree "$DOTFILES_DIR/global/agents" "$CURSOR_CONFIG_DIR/agents" "Cursor agents" 0
+    copy_tree "$DOTFILES_DIR/global/hooks" "$CURSOR_CONFIG_DIR/hooks" "Cursor hooks" 0
+    copy_tree "$DOTFILES_DIR/global/scripts" "$CURSOR_CONFIG_DIR/scripts" "Cursor scripts" 0
+    echo ""
+
+    # Codex CLI — skills (genéricas + específicas), rules, agents, scripts
+    echo "🔹 Codex CLI (skills genéricas → skills Codex-específicas, rules, agents, scripts)"
+    copy_tree "$DOTFILES_DIR/global/skills" "$CODEX_CONFIG_DIR/skills" "Codex skills" 0
+    # Codex-specific skills (sobrescreve genéricas se conflito)
+    if [ -d "$DOTFILES_DIR/global/codex/skills" ]; then
+        copy_tree "$DOTFILES_DIR/global/codex/skills" "$CODEX_CONFIG_DIR/skills" "Codex skills (específicas)" 1
     fi
+    copy_tree "$DOTFILES_DIR/global/rules" "$CODEX_CONFIG_DIR/rules" "Codex rules" 0
+    copy_tree "$DOTFILES_DIR/global/agents" "$CODEX_CONFIG_DIR/agents" "Codex agents" 0
+    copy_tree "$DOTFILES_DIR/global/scripts" "$CODEX_CONFIG_DIR/scripts" "Codex scripts" 0
+    echo ""
+
+    echo "✅ Fase 1 concluída"
+    echo ""
 fi
 
-# Instalar Cursor (recursivo: agents/ + skills/ + scripts/ + hooks.json)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# FASE 2: Aplicar overlays IDE-específicos (sobrescreve Fase 1 se conflito)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 if [[ "$INSTALL_WSL" == "1" ]]; then
-    copy_recursive_tree "$DOTFILES_DIR/cursor" "$CURSOR_CONFIG_DIR" "Cursor IDE"
+    echo "📋 FASE 2: Aplicando customizações IDE-específicas (overlays)"
+    echo ""
+
+    # Claude — settings, harness scripts, templates
+    echo "🔹 Claude — customizações IDE-específicas"
+    copy_tree "$DOTFILES_DIR/claude" "$CLAUDE_CONFIG_DIR" "Claude overlay" 1
+    if [ -d "$REPO_DIR/templates" ]; then
+        mkdir -p "$CLAUDE_CONFIG_DIR/templates"
+        cp -r "$REPO_DIR/templates"/* "$CLAUDE_CONFIG_DIR/templates/" 2>/dev/null || true
+        echo "  ✅ templates/ copiados"
+    fi
+    echo ""
+
+    # Cursor — agents customizados, hooks.json, scripts IDE-específicos
+    echo "🔹 Cursor — customizações IDE-específicas"
+    copy_tree "$DOTFILES_DIR/cursor" "$CURSOR_CONFIG_DIR" "Cursor overlay" 1
+    echo ""
+
+    # Codex — skills específicas, rules, scripts IDE-específicos
+    echo "🔹 Codex — customizações IDE-específicas"
+    copy_tree "$DOTFILES_DIR/codex" "$CODEX_CONFIG_DIR" "Codex overlay" 1
+    echo ""
+
+    echo "✅ Fase 2 concluída"
+    echo ""
 fi
 
-# Instalar Codex (recursivo: skills/ + rules/ + scripts/)
-if [[ "$INSTALL_WSL" == "1" ]]; then
-    copy_recursive_tree "$DOTFILES_DIR/codex" "$CODEX_CONFIG_DIR" "Codex CLI"
-fi
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# INSTALAÇÃO: ~/CLAUDE.md (home-level, sempre — único arquivo fora do dotfiles)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-# Instalar ~/CLAUDE.md (home-level, sempre)
+echo "📋 Instalando ~/CLAUDE.md (home-level)"
 if [ ! -f "$HOME_DIR/CLAUDE.md" ]; then
     cp "$DOTFILES_DIR/home/CLAUDE.md" "$HOME_DIR/CLAUDE.md"
-    echo "✅ ~/CLAUDE.md instalado"
+    echo "  ✅ ~/CLAUDE.md instalado"
 else
-    echo "⏭️  ~/CLAUDE.md já existe — pulando"
+    echo "  ⏭️  ~/CLAUDE.md já existe — pulando"
 fi
-
 echo ""
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# RESUMO FINAL
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 echo "✨ Instalação concluída!"
 echo ""
-echo "📋 Resumo do que foi instalado:"
+echo "📋 Resumo: 779+ artefatos corporativos distribuídos"
+echo "  FASE 1: dotfiles/global/ → ~/.claude/ + ~/.cursor/ + ~/.codex/"
+echo "  FASE 2: dotfiles/[ide]/* → ~/.*/  (overlays customizados)"
+echo ""
+echo "📦 Instalado em cada IDE:"
+echo "  • ~/.claude/             — Claude Code: skills + rules + mcp + scripts"
+echo "  • ~/.cursor/             — Cursor IDE: skills + rules + agents + hooks + scripts (+ customizações)"
+echo "  • ~/.codex/              — Codex CLI: skills + rules + agents + scripts (+ customizações)"
 echo "  • ~/CLAUDE.md            — Instrução imperativa (lido automaticamente)"
-echo "  • ~/.claude/             — Claude Code: settings.json + scripts + templates"
-echo "  • ~/.cursor/             — Cursor IDE: hooks.json + agents + skills + scripts"
-echo "  • ~/.codex/              — Codex CLI: rules + skills + scripts"
 echo ""
 echo "🔍 Validar instalação:"
 echo "  bash $REPO_DIR/scripts/validate-install.sh"
@@ -129,8 +189,8 @@ echo ""
 echo "📝 Próximos passos:"
 echo "  1. Abrir uma nova sessão ou terminal"
 echo "  2. Ir para um projeto: cd ~/Projetos/seu-projeto"
-echo "  3. Aplicar harness no projeto: bash ~/.claude/scripts/harness-apply.sh"
+echo "  3. Aplicar harness: bash ~/.claude/scripts/harness-apply.sh"
 echo ""
-echo "📚 Referência:"
-echo "  • Harness: @~/.claude/HARNESS.md (ou ~/.cursor/HARNESS.md, ~/.codex/HARNESS.md)"
+echo "📚 Documentação:"
+echo "  • Versão: git log -1 --oneline install.sh"
 echo "  • Atualizar: cd $REPO_DIR && git pull && bash install.sh"
