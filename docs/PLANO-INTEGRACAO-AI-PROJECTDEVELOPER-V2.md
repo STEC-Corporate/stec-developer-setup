@@ -86,19 +86,19 @@ dotfiles/
 
 ```
 Fase 1: Copia global → home (SOBRESCREVE arquivos existentes)
+├── ⭐ dotfiles/global/skills/* → ~/.claude/skills/, ~/.cursor/skills/, ~/.codex/skills/ ← Skills para TODOS
 ├── dotfiles/global/agents/* → ~/.cursor/agents/, ~/.codex/agents/
-├── dotfiles/global/skills/* → ~/.claude/skills/, ~/.cursor/skills/, ~/.codex/skills/
 ├── dotfiles/global/rules/* → ~/.cursor/rules/, ~/.codex/rules/
 ├── dotfiles/global/hooks/* → ~/.cursor/hooks.json, ~/.codex/rules/
 └── dotfiles/global/mcp/* → ~/.claude/mcp/
 
 Fase 2: Copia específicas → home (SOBRESCREVE Fase 1 e arquivos existentes)
-├── dotfiles/claude/* → ~/.claude/
-├── dotfiles/cursor/* → ~/.cursor/
-└── dotfiles/codex/* → ~/.codex/
-    └── codex/skills/* → ~/.codex/skills/ ⭐ (Skills Codex pré-convertidas, sobrescrevem global/skills se houver conflito)
+├── dotfiles/claude/* → ~/.claude/ (pode conter skills/rules/mcp adicionais)
+├── dotfiles/cursor/* → ~/.cursor/ (pode conter skills/agents/rules adicionais)
+└── dotfiles/codex/* → ~/.codex/ (pode conter skills/agents/rules adicionais)
+    └── ⭐ codex/skills/* → ~/.codex/skills/ (Skills Codex pré-convertidas, SOBRESCREVEM global/skills se houver conflito)
 
-Resultado Final: Recursos globais + customizações locais (locais sobrescrevem globais)
+Resultado Final: Skills globais em TODAS as 3 IDEs + customizações locais específicas (locais sobrescrevem globais)
 ```
 
 ### 🔄 Política de Sobrescrita
@@ -115,8 +115,11 @@ Resultado Final: Recursos globais + customizações locais (locais sobrescrevem 
 - Garantir que customizações locais (`dotfiles/[claude|cursor|codex]/`) sejam copiadas **depois** de `global/`, sobrescrevendo se necessário
 
 ⭐ **Nota Importante:**
-- A pasta `dotfiles/global/skills/` contém skills genéricas em Markdown que são redistribuídas para **Claude Code** (`~/.claude/skills/`), **Cursor** (`~/.cursor/skills/`) e **Codex** (`~/.codex/skills/`).
-- A pasta `dotfiles/global/codex-skills/` contém skills já convertidas e formatadas especificamente para o **Codex CLI**. Diferente das skills genéricas, **estes arquivos devem ser copiados para `~/.codex/agents/` SEM qualquer transformação adicional**, pois já estão no formato esperado pelo Codex.
+- **A pasta `dotfiles/global/skills/` é replicada para TODAS as 3 IDEs:**
+  - `dotfiles/global/skills/` → `~/.claude/skills/` ✅ Claude Code
+  - `dotfiles/global/skills/` → `~/.cursor/skills/` ✅ Cursor IDE
+  - `dotfiles/global/skills/` → `~/.codex/skills/` ✅ Codex CLI
+- **A pasta `dotfiles/codex/skills/`** contém skills já convertidas e formatadas especificamente para o **Codex CLI**. Diferente das skills genéricas, **estes arquivos são copiados em Fase 2 para `~/.codex/skills/` SEM qualquer transformação adicional**, pois já estão no formato esperado pelo Codex. Codex-specific skills SOBRESCREVEM global/skills se houver conflito de nome.
 
 ---
 
@@ -124,20 +127,27 @@ Resultado Final: Recursos globais + customizações locais (locais sobrescrevem 
 
 **Referência:** `@docs/ferramentas/Mapeamento-Arquivos-IDEs.md`
 
+⚠️ **IMPORTANTE — Skills são replicadas para as 3 ferramentas:**
+- `dotfiles/global/skills/` → `~/.claude/skills/` ✅ **Claude Code recebe skills**
+- `dotfiles/global/skills/` → `~/.cursor/skills/` ✅ **Cursor IDE recebe skills**
+- `dotfiles/global/skills/` → `~/.codex/skills/` ✅ **Codex CLI recebe skills**
+
+Todos os 3 IDEs recebem o mesmo catálogo de skills em Markdown da pasta `global/skills/`, mais skills específicas de cada IDE em suas pastas overlay (`dotfiles/claude/`, `dotfiles/cursor/`, `dotfiles/codex/`).
+
 ### Origem: dotfiles/global/ → Destino: ~/.claude/, ~/.cursor/, ~/.codex/
 
 | Artefatos em `dotfiles/global/` | Claude (`~/.claude`) | Cursor (`~/.cursor`) | Codex (`~/.codex`) |
 |--------------------------------|----------------------|----------------------|---------------------|
 | `agents/` (agents .md) | **Ignorar** (não usa agents nativos) | `agents/` ← cópia direta | `agents/` ← cópia direta |
-| `skills/**` (SKILL.md genéricos) | `skills/` ← cópia direta | `skills/` ← cópia direta | `skills/` ← cópia direta |
+| **`skills/**` (SKILL.md genéricos)** | **⭐ `skills/` ← cópia direta** | **⭐ `skills/` ← cópia direta** | **⭐ `skills/` ← cópia direta** |
 | `rules/*.mdc` | Guardrails em CLAUDE.md (política adicional) | `rules/` ← cópia direta | `rules/` ← cópia direta |
 | `hooks/` + `hooks.json` | Converter para MCP server config | `hooks.json` ← cópia com **paths absolutos** | Converter para `.rules` DSL |
 | `mcp/` | `mcp/` ← cópia direta | — | — |
 | `plans/` | Opcional (se Claude consumir) | Opcional (se Cursor consumir) | Opcional (se Codex consumir) |
 | `schemas/` | Opcional (estrutura) | Opcional (estrutura) | Opcional (estrutura) |
 
-**⭐ ESPECIAL - Artefatos em `dotfiles/codex/`** | | | Codex (`~/.codex`) |
-| `codex/skills/**` (ex-`codex-skills/` do AI-PD) | — | — | `skills/` ← cópia direta (Fase 2, sobrescreve global/skills se conflito) |
+**⭐ ESPECIAL - Artefatos em `dotfiles/codex/`** | | | |
+| `codex/skills/**` (ex-`codex-skills/` do AI-PD) | — | — | **⭐ `skills/` ← cópia direta (Fase 2, sobrescreve global/skills se conflito)** |
 
 ### Nota sobre Conversão e Transformação
 
@@ -154,11 +164,12 @@ Resultado Final: Recursos globais + customizações locais (locais sobrescrevem 
 
 **Recursos que NÃO precisam conversão** (cópia direta):
 
-1. **Skills** (`global/skills/*/SKILL.md`) — Formato Markdown unificado
-   - → Para Claude: Copiar como-é em `~/.claude/skills/`
-   - → Para Cursor: Copiar como-é em `~/.cursor/skills/`
-   - → Para Codex: Copiar como-é em `~/.codex/skills/`
-   - ✅ Formato nativo para todos
+1. **⭐ Skills** (`global/skills/*/SKILL.md`) — Formato Markdown unificado (REPLICADO para 3 IDEs)
+   - → **Para Claude Code:** Copiar como-é em `~/.claude/skills/` ✅
+   - → **Para Cursor IDE:** Copiar como-é em `~/.cursor/skills/` ✅
+   - → **Para Codex CLI:** Copiar como-é em `~/.codex/skills/` ✅
+   - ✅ Formato Markdown é nativo para todos os 3 IDEs
+   - **Nota:** Claude Code usa skills em Markdown como mecanismo principal de personalização
 
 2. **Agents** (`global/agents/*.md`) — Formato Markdown+YAML
    - → Para Claude: Ignorar (não utiliza agents)
@@ -325,7 +336,7 @@ dotfiles/
 ```mermaid
 flowchart LR
   subgraph repo [stec-developer-setup]
-    G["dotfiles/global<br/>(AI-ProjectDeveloper)"]
+    G["dotfiles/global<br/>(AI-ProjectDeveloper)<br/>── skills/ agents/ rules/"]
     OC["dotfiles/claude<br/>(Customizações)"]
     OX["dotfiles/codex<br/>(Customizações)"]
     OR["dotfiles/cursor<br/>(Customizações)"]
@@ -336,12 +347,12 @@ flowchart LR
     HR["~/.cursor<br/>(Cursor IDE)"]
   end
   
-  G -->|"skills/ rules/ hooks/ mcp/"| HC
-  G -->|"skills/ codex-skills→agents/"| HX
-  G -->|"agents/ skills/ rules/ hooks/"| HR
+  G -->|"⭐ skills/ rules/ mcp/"| HC
+  G -->|"⭐ skills/ agents/ rules/"| HX
+  G -->|"⭐ skills/ agents/ rules/ hooks/"| HR
   
   OC -->|"override"| HC
-  OX -->|"override"| HX
+  OX -->|"override codex/skills"| HX
   OR -->|"override"| HR
   
   style G fill:#e1f5ff
@@ -540,15 +551,20 @@ copy_recursive_tree() {
 
 # Fase 1: Copiar global para configurações (SOBRESCREVE tudo)
 copy_from_global() {
-    # Broadcast para 3 IDEs — todos os arquivos são SOBRESCRITOS
-    copy_recursive_tree "$DOTFILES_DIR/global/agents" "$CURSOR_CONFIG_DIR/agents" "Global Agents → Cursor"
-    copy_recursive_tree "$DOTFILES_DIR/global/skills" "$CLAUDE_CONFIG_DIR/skills" "Global Skills → Claude"
-    copy_recursive_tree "$DOTFILES_DIR/global/skills" "$CURSOR_CONFIG_DIR/skills" "Global Skills → Cursor"
-    copy_recursive_tree "$DOTFILES_DIR/global/skills" "$CODEX_CONFIG_DIR/skills" "Global Skills → Codex"
+    # ⭐ IMPORTANTE: Skills vão para TODAS as 3 ferramentas
+    copy_recursive_tree "$DOTFILES_DIR/global/skills" "$CLAUDE_CONFIG_DIR/skills" "⭐ Global Skills → Claude Code"
+    copy_recursive_tree "$DOTFILES_DIR/global/skills" "$CURSOR_CONFIG_DIR/skills" "⭐ Global Skills → Cursor IDE"
+    copy_recursive_tree "$DOTFILES_DIR/global/skills" "$CODEX_CONFIG_DIR/skills" "⭐ Global Skills → Codex CLI"
     
+    # Agents vão para Cursor e Codex (Claude não usa agents nativos)
+    copy_recursive_tree "$DOTFILES_DIR/global/agents" "$CURSOR_CONFIG_DIR/agents" "Global Agents → Cursor"
+    copy_recursive_tree "$DOTFILES_DIR/global/agents" "$CODEX_CONFIG_DIR/agents" "Global Agents → Codex"
+    
+    # Rules vão para Cursor e Codex
     copy_recursive_tree "$DOTFILES_DIR/global/rules" "$CURSOR_CONFIG_DIR/rules" "Global Rules → Cursor"
     copy_recursive_tree "$DOTFILES_DIR/global/rules" "$CODEX_CONFIG_DIR/rules" "Global Rules → Codex"
     
+    # MCP vai para Claude
     copy_recursive_tree "$DOTFILES_DIR/global/mcp" "$CLAUDE_CONFIG_DIR/mcp" "Global MCP → Claude"
     
     # Hooks: precisam conversão (ver função separada)
