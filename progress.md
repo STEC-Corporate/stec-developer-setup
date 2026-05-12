@@ -3,8 +3,8 @@
 **Projeto:** stec-developer-setup  
 **Objetivo:** Centralizar catálogo corporativo em `dotfiles/global/`, remover submodule `.cursor`  
 **Data Início:** 2026-05-11  
-**Status Geral:** 🟡 **Em Progresso** (Fase 2 → 3)
-**Progresso:** TODO-1,2 ✅ Completo | TODO-3-6 ⏳ Pendentes
+**Status Geral:** 🟡 **Em Progresso** (Fase 3 → 4)
+**Progresso:** TODO-1,2,3 ✅ Completo | TODO-4-6 ⏳ Pendentes
 
 ---
 
@@ -91,14 +91,15 @@
 #### TODO-3: Mover/Dedup Conteúdos de Overlays
 - **Descrição:** Reorganizar `dotfiles/[claude|cursor|codex]/` removendo duplicatas, mantendo apenas customizações
 - **Atividades:**
-  - [ ] Revisar `dotfiles/claude/` — remover duplicatas com global
-  - [ ] Revisar `dotfiles/cursor/` — remover duplicatas com global
-  - [ ] Revisar `dotfiles/codex/` — confirmar que skills Codex-específicas estão aqui
-  - [ ] Consolidar scripts repetidos (harness, guard-shell, etc.) em fonte única
-  - [ ] Documentar o que fica em cada overlay (e por quê)
-- **Bloqueante:** Após TODO-2
+  - [x] Revisar `dotfiles/claude/` — remover duplicatas com global ✅
+  - [x] Revisar `dotfiles/cursor/` — remover duplicatas com global (12 skills) ✅
+  - [x] Revisar `dotfiles/codex/` — remover skills Codex duplicadas (2 skills) ✅
+  - [x] Consolidar scripts repetidos (init-env-helper.sh → global/scripts) ✅
+  - [x] Documentar o que fica em cada overlay (e por quê) ✅
+- **Bloqueante:** Após TODO-2 ✅
 - **Estimado:** 3-4 horas
-- **Status:** ⏳ **Pending**
+- **Status:** ✅ **Completo** (duração real: ~2 min)
+- **Documento:** `@docs/TODO-3-DEDUP-OVERLAYS.md`
 
 #### TODO-4: Transcrições de Formato por IDE
 - **Descrição:** Garantir que recursos específicos de IDE estão no formato correto
@@ -185,12 +186,12 @@
 
 | Métrica | Status |
 |---------|--------|
-| **TODOs Completos** | 2/6 ✅ (TODO-1, TODO-2) |
-| **TODOs Pendentes** | 4/6 ⏳ |
+| **TODOs Completos** | 3/6 ✅ (TODO-1, TODO-2, TODO-3) |
+| **TODOs Pendentes** | 3/6 ⏳ |
 | **TODOs Bloqueados** | 0 |
 | **Decisões Arquiteturais Fechadas** | 4/4 ✅ |
-| **Estimado Restante** | 12-17 horas de trabalho |
-| **Tempo Real (TODO-1+2)** | ~10 min (vs. 6-9 horas estimado) ⚡⚡ |
+| **Estimado Restante** | 9-14 horas de trabalho |
+| **Tempo Real (TODO-1+2+3)** | ~15 min (vs. 9-13 horas estimado) ⚡⚡⚡ |
 
 ---
 
