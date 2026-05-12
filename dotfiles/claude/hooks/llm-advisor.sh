@@ -50,8 +50,8 @@ DOMAIN_FILE="$DOCS_ROOT/by-domain/$DOMAIN.md"
 [[ ! -f "$DOMAIN_FILE" ]] && DOMAIN_FILE="$DOCS_ROOT/by-domain/other-domains.md"
 [[ ! -f "$DOMAIN_FILE" ]] && exit 0
 
-MODEL=$(grep -m1 "^\*\*Primary:\*\*" "$DOMAIN_FILE" | awk '{print $2}')
-REASON=$(grep -m1 "^\*\*Razão:\*\*" "$DOMAIN_FILE" | cut -d: -f2- | xargs)
+MODEL=$(grep -m1 "\*\*Primary:\*\*" "$DOMAIN_FILE" | sed 's/.*\*\*Primary:\*\* *//' | tr -d '`' | awk '{print $1}')
+REASON=$(grep -m1 "\*\*Razão:\*\*" "$DOMAIN_FILE" | sed 's/.*\*\*Razão:\*\* *//')
 
 [[ -z "$MODEL" ]] && exit 0
 

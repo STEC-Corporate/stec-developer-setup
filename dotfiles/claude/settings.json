@@ -42,7 +42,7 @@
           {
             "type": "command",
             "command": "bash ~/.claude/hooks/llm-advisor.sh",
-            "async": true,
+            "timeout": 5,
             "statusMessage": "LLM Advisor analisando..."
           }
         ]
