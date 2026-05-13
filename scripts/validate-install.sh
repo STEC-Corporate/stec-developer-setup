@@ -108,6 +108,7 @@ echo ""
 echo "🔹 Claude Code (~/.claude/)"
 check_subdirs "$CLAUDE_CONFIG_DIR/skills" 316  "skills (316 genéricas)"
 check_files   "$CLAUDE_CONFIG_DIR/rules"  93   "rules (93 MDC)"
+check_files   "$CLAUDE_CONFIG_DIR/hooks"  1    "hooks (task-completion.sh)"
 check_files   "$CLAUDE_CONFIG_DIR/docs/llm/by-domain" 25 "docs/llm (25 domínios)"
 echo ""
 
@@ -115,6 +116,7 @@ echo "🔹 Cursor IDE (~/.cursor/)"
 check_subdirs "$CURSOR_CONFIG_DIR/skills" 316  "skills (316 genéricas)"
 check_files   "$CURSOR_CONFIG_DIR/agents" 230  "agents (230 + INDEX.md)"
 check_files   "$CURSOR_CONFIG_DIR/rules"  93   "rules (93 MDC)"
+check_files   "$CURSOR_CONFIG_DIR/hooks"  1    "hooks (task-completion.sh)"
 check_files   "$CURSOR_CONFIG_DIR/docs/llm/by-domain" 25 "docs/llm (25 domínios)"
 echo ""
 
@@ -122,6 +124,7 @@ echo "🔹 Codex CLI (~/.codex/)"
 check_subdirs "$CODEX_CONFIG_DIR/skills"  320  "skills (316 genéricas + 4 Codex-específicas)"
 check_files   "$CODEX_CONFIG_DIR/agents"  229  "agents"
 check_files   "$CODEX_CONFIG_DIR/rules"   93   "rules (93 MDC)"
+check_files   "$CODEX_CONFIG_DIR/hooks"   1    "hooks (task-completion.sh)"
 check_files   "$CODEX_CONFIG_DIR/docs/llm/by-domain" 25 "docs/llm (25 domínios)"
 echo ""
 
@@ -142,12 +145,73 @@ validate_overlay "$DOTFILES_DIR/codex" "$CODEX_CONFIG_DIR" "Codex CLI"
 echo ""
 
 # ─── Home Level ───────────────────────────────────────────────────────────────
-echo "📋 Home Level"
+echo "📋 Home Level — ~/CLAUDE.md"
+
+# Função para validar conteúdo do ~/CLAUDE.md
+validate_claude_md() {
+    local FILE="$1"
+    local EXPECTED_SECTIONS=(
+        "# Identidade do Desenvolvedor"
+        "## Perfil"
+        "## Preferências de resposta"
+        "## Plataforma atual"
+        "## Critério de conclusão de qualquer tarefa"
+        "# Instruções Globais — Harness Automático"
+        "## 🎯 Ação Obrigatória ao Iniciar Sessão"
+    )
+    
+    local MISSING_SECTIONS=()
+    
+    for section in "${EXPECTED_SECTIONS[@]}"; do
+        if ! grep -q "^$section" "$FILE" 2>/dev/null; then
+            MISSING_SECTIONS+=("$section")
+        fi
+    done
+    
+    if [ ${#MISSING_SECTIONS[@]} -eq 0 ]; then
+        echo "  ✅ ~/CLAUDE.md estrutura completa"
+        TOTAL_OK=$((TOTAL_OK + 1))
+        
+        # Verificar se está atualizado comparando com dotfiles/home/CLAUDE.md
+        if [ -f "$DOTFILES_DIR/home/CLAUDE.md" ]; then
+            if command -v md5sum >/dev/null 2>&1; then
+                SRC_HASH=$(md5sum "$DOTFILES_DIR/home/CLAUDE.md" | cut -d' ' -f1)
+                DEST_HASH=$(md5sum "$FILE" | cut -d' ' -f1)
+                if [ "$SRC_HASH" = "$DEST_HASH" ]; then
+                    echo "  ✅ ~/CLAUDE.md sincronizado com dotfiles/home/"
+                    TOTAL_OK=$((TOTAL_OK + 1))
+                else
+                    echo "  ⚠️  ~/CLAUDE.md diverge do dotfiles/home/ — recomendado bash install.sh"
+                    TOTAL_MISSING=$((TOTAL_MISSING + 1))
+                fi
+            else
+                # Fallback: comparar data de modificação
+                if [ "$DOTFILES_DIR/home/CLAUDE.md" -nt "$FILE" ]; then
+                    echo "  ⚠️  ~/CLAUDE.md desatualizado — recomendado bash install.sh"
+                    TOTAL_MISSING=$((TOTAL_MISSING + 1))
+                else
+                    echo "  ✅ ~/CLAUDE.md aparenta estar atualizado"
+                    TOTAL_OK=$((TOTAL_OK + 1))
+                fi
+            fi
+        else
+            echo "  ⚠️  Não foi possível comparar com dotfiles/home/CLAUDE.md"
+        fi
+    else
+        echo "  ❌ ~/CLAUDE.md INCOMPLETO — faltam seções:"
+        for missing in "${MISSING_SECTIONS[@]}"; do
+            echo "      - $missing"
+        done
+        echo "  🔧 Execute: bash install.sh para corrigir"
+        TOTAL_MISSING=$((TOTAL_MISSING + 1))
+    fi
+}
+
 if [ -f "$HOME_DIR/CLAUDE.md" ]; then
-    echo "  ✅ ~/CLAUDE.md presente"
-    TOTAL_OK=$((TOTAL_OK + 1))
+    validate_claude_md "$HOME_DIR/CLAUDE.md"
 else
     echo "  ❌ ~/CLAUDE.md FALTANDO"
+    echo "  🔧 Execute: bash install.sh para criar"
     TOTAL_MISSING=$((TOTAL_MISSING + 1))
 fi
 echo ""

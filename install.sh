@@ -89,12 +89,13 @@ if [[ "$INSTALL_WSL" == "1" ]]; then
     echo "📋 FASE 1: Distribuindo catálogo corporativo (dotfiles/global/)"
     echo ""
 
-    # Claude Code — skills + rules + mcp + scripts + docs/llm (NÃO agents — ignorado por Claude)
-    echo "🔹 Claude Code (skills, rules, mcp, scripts, docs/llm)"
+    # Claude Code — skills + rules + mcp + scripts + hooks + docs/llm (NÃO agents — ignorado por Claude)
+    echo "🔹 Claude Code (skills, rules, mcp, scripts, hooks, docs/llm)"
     copy_tree "$DOTFILES_DIR/global/skills" "$CLAUDE_CONFIG_DIR/skills" "Claude skills" 0
     copy_tree "$DOTFILES_DIR/global/rules" "$CLAUDE_CONFIG_DIR/rules" "Claude rules" 0
     copy_tree "$DOTFILES_DIR/global/mcp" "$CLAUDE_CONFIG_DIR/mcp" "Claude mcp" 0
     copy_tree "$DOTFILES_DIR/global/scripts" "$CLAUDE_CONFIG_DIR/scripts" "Claude scripts" 0
+    copy_tree "$DOTFILES_DIR/global/hooks" "$CLAUDE_CONFIG_DIR/hooks" "Claude hooks" 0
     copy_tree "$DOTFILES_DIR/global/docs/llm" "$CLAUDE_CONFIG_DIR/docs/llm" "Claude docs/llm" 0
     echo ""
 
@@ -108,8 +109,8 @@ if [[ "$INSTALL_WSL" == "1" ]]; then
     copy_tree "$DOTFILES_DIR/global/docs/llm" "$CURSOR_CONFIG_DIR/docs/llm" "Cursor docs/llm" 0
     echo ""
 
-    # Codex CLI — skills (genéricas + específicas), rules, agents, scripts + docs/llm
-    echo "🔹 Codex CLI (skills genéricas → skills Codex-específicas, rules, agents, scripts, docs/llm)"
+    # Codex CLI — skills (genéricas + específicas), rules, agents, hooks, scripts + docs/llm
+    echo "🔹 Codex CLI (skills genéricas → skills Codex-específicas, rules, agents, hooks, scripts, docs/llm)"
     copy_tree "$DOTFILES_DIR/global/skills" "$CODEX_CONFIG_DIR/skills" "Codex skills" 0
     # Codex-specific skills (sobrescreve genéricas se conflito)
     if [ -d "$DOTFILES_DIR/global/codex/skills" ]; then
@@ -117,6 +118,7 @@ if [[ "$INSTALL_WSL" == "1" ]]; then
     fi
     copy_tree "$DOTFILES_DIR/global/rules" "$CODEX_CONFIG_DIR/rules" "Codex rules" 0
     copy_tree "$DOTFILES_DIR/global/agents" "$CODEX_CONFIG_DIR/agents" "Codex agents" 0
+    copy_tree "$DOTFILES_DIR/global/hooks" "$CODEX_CONFIG_DIR/hooks" "Codex hooks" 0
     copy_tree "$DOTFILES_DIR/global/scripts" "$CODEX_CONFIG_DIR/scripts" "Codex scripts" 0
     copy_tree "$DOTFILES_DIR/global/docs/llm" "$CODEX_CONFIG_DIR/docs/llm" "Codex docs/llm" 0
     echo ""
@@ -162,11 +164,39 @@ fi
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 echo "📋 Instalando ~/CLAUDE.md (home-level)"
+
+# Verificar se precisa atualizar (comparar data de modificação ou hash)
+NEEDS_UPDATE=0
+
 if [ ! -f "$HOME_DIR/CLAUDE.md" ]; then
-    cp "$DOTFILES_DIR/home/CLAUDE.md" "$HOME_DIR/CLAUDE.md"
-    echo "  ✅ ~/CLAUDE.md instalado"
+    NEEDS_UPDATE=1
+    echo "  📝 ~/CLAUDE.md não existe — criando"
+elif [ "$DOTFILES_DIR/home/CLAUDE.md" -nt "$HOME_DIR/CLAUDE.md" ]; then
+    NEEDS_UPDATE=1
+    echo "  🔄 ~/CLAUDE.md desatualizado — atualizando"
 else
-    echo "  ⏭️  ~/CLAUDE.md já existe — pulando"
+    # Verificar hash para garantir integridade
+    if command -v md5sum >/dev/null 2>&1; then
+        SRC_HASH=$(md5sum "$DOTFILES_DIR/home/CLAUDE.md" | cut -d' ' -f1)
+        DEST_HASH=$(md5sum "$HOME_DIR/CLAUDE.md" 2>/dev/null | cut -d' ' -f1)
+        if [ "$SRC_HASH" != "$DEST_HASH" ]; then
+            NEEDS_UPDATE=1
+            echo "  🔧 ~/CLAUDE.md modificado — restaurando versão oficial"
+        fi
+    fi
+fi
+
+if [ "$NEEDS_UPDATE" -eq 1 ]; then
+    # Backup do arquivo existente se for diferente
+    if [ -f "$HOME_DIR/CLAUDE.md" ]; then
+        cp "$HOME_DIR/CLAUDE.md" "$HOME_DIR/CLAUDE.md.backup.$(date +%Y%m%d_%H%M%S)"
+        echo "  💾 Backup criado: ~/CLAUDE.md.backup.$(date +%Y%m%d_%H%M%S)"
+    fi
+    
+    cp "$DOTFILES_DIR/home/CLAUDE.md" "$HOME_DIR/CLAUDE.md"
+    echo "  ✅ ~/CLAUDE.md atualizado"
+else
+    echo "  ✅ ~/CLAUDE.md já está atualizado"
 fi
 echo ""
 
@@ -181,9 +211,9 @@ echo "  FASE 1: dotfiles/global/ → ~/.claude/ + ~/.cursor/ + ~/.codex/"
 echo "  FASE 2: dotfiles/[ide]/* → ~/.*/  (overlays customizados)"
 echo ""
 echo "📦 Instalado em cada IDE:"
-echo "  • ~/.claude/             — Claude Code: skills + rules + mcp + scripts"
+echo "  • ~/.claude/             — Claude Code: skills + rules + mcp + scripts + hooks"
 echo "  • ~/.cursor/             — Cursor IDE: skills + rules + agents + hooks + scripts (+ customizações)"
-echo "  • ~/.codex/              — Codex CLI: skills + rules + agents + scripts (+ customizações)"
+echo "  • ~/.codex/              — Codex CLI: skills + rules + agents + hooks + scripts (+ customizações)"
 echo "  • ~/CLAUDE.md            — Instrução imperativa (lido automaticamente)"
 echo ""
 echo "🔍 Validar instalação:"

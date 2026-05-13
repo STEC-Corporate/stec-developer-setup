@@ -1,3 +1,52 @@
+# Identidade do Desenvolvedor
+
+## Perfil
+- 20+ anos: Java, C#, .NET, JavaScript, Angular, Next.js, TypeScript
+- Intermediário: Python
+- MBA Arquitetura de Software em andamento
+- Estudando IA há 1 ano: CursorAI, SDD, Harness
+
+## Preferências de resposta
+- Direto ao ponto, sem explicar o óbvio
+- Sugira sempre a abordagem mais simples primeiro
+- Apresente argumentos para decisões arquiteturais
+- Português, exceto termos técnicos
+
+## Plataforma atual
+- Múltiplos monorepos + repos satélites
+- Gateway LLM próprio: MCP + REST
+- Skills: locais (.md) + via gateway
+- Infra: AWS + Terraform + Docker local
+- CI/CD: GitHub Actions
+- SO: Windows WSL
+
+## Critério de conclusão de qualquer tarefa
+Só está 100% quando:
+- Testes passando ✅
+- Lint sem erros ✅
+- Build sem warnings ✅
+- Sem secrets expostos ✅
+
+## Padrão de Commits
+Use este modelo para **TODOS** os projetos:
+
+```
+<tipo>: <descrição curta e objetiva>
+
+- <mudança específica 1>
+- <mudança específica 2>
+- <mudança específica N>
+```
+
+**Tipos:** `feat`, `fix`, `chore`, `docs`, `refactor`
+
+**Regras obrigatórias:**
+- ❌ Sem referências a Claude, AI, agent, "Generated with"
+- ❌ Sem Co-Authored-By automático
+- ✅ Foco no **que** foi feito e **por quê**
+- ✅ Mensagem objetiva e técnica
+- ✅ Lista de mudanças específicas
+
 # Instruções Globais — Harness Automático
 
 ## 🎯 Ação Obrigatória ao Iniciar Sessão

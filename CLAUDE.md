@@ -89,3 +89,31 @@ Isto garante que toda atualização em `dotfiles/` seja **sempre** refletida em 
 
 **Status:** ✅ Integração v3.0 completa (2026-05-11)  
 **Manutenção:** `bash install.sh` para distribuir atualizações
+
+---
+
+## 📋 Tarefas Pendentes
+
+### 🔄 T-SETUP-001: Criar Hook para Finalização de Tarefa
+**Descrição:** Implementar hook que detecta finalização de tarefa (status "completed" no TodoWrite) e automaticamente:
+1. Identifica próxima tarefa na lista
+2. Recomenda LLM adequado para próxima tarefa
+3. Exibe mensagem com próximos passos
+
+**Evento alvo:** `PostToolUse` matcher `TodoWrite` quando status muda para "completed"
+
+**Implementação:**
+- Criar `dotfiles/global/hooks/task-completion.sh`
+- Adicionar matcher no `settings.json` para `TodoWrite` tool
+- Script deve:
+  - Detectar mudança de status para "completed" 
+  - Identificar próxima tarefa pendente
+  - Chamar LLM Advisor para próxima tarefa
+  - Retornar `systemMessage` com recomendação
+
+**Arquivos afetados:**
+- `dotfiles/global/hooks/task-completion.sh` (novo)
+- `dotfiles/global/settings.json` (adicionar hook PostToolUse)
+- `dotfiles/global/docs/hooks.md` (documentar novo hook)
+
+**Prioridade:** Alta - melhora fluxo de trabalho com tarefas
