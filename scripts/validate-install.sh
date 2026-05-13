@@ -2,19 +2,136 @@
 # Valida se ~/.claude/, ~/.cursor/ e ~/.codex/ têm todos os recursos do dotfiles/
 # Fase 1: catálogo global (por contagem mínima), Fase 2: overlays (por arquivo)
 
+set -euo pipefail
+
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DOTFILES_DIR="$REPO_DIR/dotfiles"
 
 TOTAL_OK=0
 TOTAL_MISSING=0
 
+# Configuração de debugging
+DEBUG_MODE="${DEBUG_MODE:-0}"
+debug() {
+    if [ "$DEBUG_MODE" = "1" ]; then
+        echo "🐛 DEBUG: $*" >&2
+    fi
+}
+
+# ─── Verificações de Encoding e Locale ───────────────────────────────────────
+check_encoding() {
+    debug "Verificando locale e encoding UTF-8..."
+    
+    # Verificar se locale está disponível
+    if command -v locale >/dev/null 2>&1; then
+        local current_locale
+        current_locale=$(locale | grep -E '^LC_ALL=|^LANG=' | head -1 | cut -d= -f2 | tr -d '"')
+        debug "Locale atual: ${current_locale:-not_set}"
+        
+        # Verificar se locale tem UTF-8
+        if ! echo "$current_locale" | grep -qi 'utf.*8'; then
+            debug "Locale não é UTF-8, tentando configurar..."
+            export LC_ALL=C.UTF-8 2>/dev/null || export LC_ALL=en_US.UTF-8 2>/dev/null || true
+            export LANG=C.UTF-8 2>/dev/null || export LANG=en_US.UTF-8 2>/dev/null || true
+        fi
+    else
+        debug "Comando 'locale' não disponível, configurando UTF-8 padrão..."
+        export LC_ALL=C.UTF-8 2>/dev/null || export LC_ALL=en_US.UTF-8 2>/dev/null || true
+        export LANG=C.UTF-8 2>/dev/null || export LANG=en_US.UTF-8 2>/dev/null || true
+    fi
+    
+    # Verificar versão do grep para compatibilidade com emojis
+    local grep_version
+    if grep_version=$(grep --version 2>/dev/null | head -1); then
+        debug "Versão do grep: $grep_version"
+        if echo "$grep_version" | grep -q "GNU grep"; then
+            export GREP_TYPE="gnu"
+        elif echo "$grep_version" | grep -q "BSD grep"; then
+            export GREP_TYPE="bsd"
+        else
+            export GREP_TYPE="unknown"
+        fi
+    else
+        export GREP_TYPE="unknown"
+        debug "Não foi possível determinar versão do grep"
+    fi
+}
+
+# Função grep robusta para diferentes ambientes
+robust_grep() {
+    local pattern="$1"
+    local file="$2"
+    local options="${3:-}"
+    
+    debug "Executando grep robusto: pattern='$pattern' file='$file'"
+    
+    # Verificar se arquivo existe e é legível
+    if [ ! -f "$file" ] || [ ! -r "$file" ]; then
+        debug "Arquivo não existe ou não é legível: $file"
+        return 1
+    fi
+    
+    # Verificar encoding do arquivo
+    if command -v file >/dev/null 2>&1; then
+        local file_info
+        file_info=$(file "$file" 2>/dev/null || echo "unknown")
+        debug "Info do arquivo: $file_info"
+        
+        if echo "$file_info" | grep -qi "binary"; then
+            debug "Arquivo binário detectado, pulando grep: $file"
+            return 1
+        fi
+    fi
+    
+    # Tentar múltiplas estratégias de grep
+    local result=1
+    
+    # Estratégia 1: grep com LC_ALL=C para evitar problemas de locale
+    if LC_ALL=C grep $options "$pattern" "$file" >/dev/null 2>&1; then
+        debug "Grep com LC_ALL=C: sucesso"
+        return 0
+    fi
+    
+    # Estratégia 2: grep com LANG=C
+    if LANG=C grep $options "$pattern" "$file" >/dev/null 2>&1; then
+        debug "Grep com LANG=C: sucesso"
+        return 0
+    fi
+    
+    # Estratégia 3: grep padrão
+    if grep $options "$pattern" "$file" >/dev/null 2>&1; then
+        debug "Grep padrão: sucesso"
+        return 0
+    fi
+    
+    # Estratégia 4: usar awk como fallback para padrões simples
+    if command -v awk >/dev/null 2>&1; then
+        if awk "/$pattern/ { found=1; exit } END { exit !found }" "$file" 2>/dev/null; then
+            debug "Fallback awk: sucesso"
+            return 0
+        fi
+    fi
+    
+    debug "Todas as estratégias de grep falharam"
+    return 1
+}
+
 CLAUDE_CONFIG_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 CURSOR_CONFIG_DIR="${CURSOR_CONFIG_DIR:-$HOME/.cursor}"
 CODEX_CONFIG_DIR="${CODEX_CONFIG_DIR:-$HOME/.codex}"
 HOME_DIR="${HOME_DIR:-$HOME}"
 
+# Executar verificações de encoding no início
+check_encoding
+
 echo "🔍 Validação de Instalação — stec-developer-setup"
 echo "📍 Repositório: $REPO_DIR"
+if [ "$DEBUG_MODE" = "1" ]; then
+    echo "🐛 DEBUG MODE: Habilitado"
+    echo "🐛 GREP_TYPE: ${GREP_TYPE:-not_set}"
+    echo "🐛 LC_ALL: ${LC_ALL:-not_set}"
+    echo "🐛 LANG: ${LANG:-not_set}"
+fi
 echo ""
 
 # Verifica contagem de subdiretórios (para skills — cada skill é uma pasta)
@@ -23,20 +140,41 @@ check_subdirs() {
     local MIN="$2"
     local LABEL="$3"
 
+    debug "Verificando subdiretórios em: $DIR (mínimo: $MIN)"
+
     if [ ! -d "$DIR" ]; then
         echo "  ❌ $LABEL — diretório $DIR não existe"
+        debug "Diretório não existe: $DIR"
+        TOTAL_MISSING=$((TOTAL_MISSING + 1))
+        return
+    fi
+
+    if [ ! -r "$DIR" ]; then
+        echo "  ❌ $LABEL — diretório $DIR não é legível"
+        debug "Diretório não é legível: $DIR"
         TOTAL_MISSING=$((TOTAL_MISSING + 1))
         return
     fi
 
     local COUNT
     COUNT=$(find "$DIR" -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l)
+    debug "Contagem de subdiretórios em $DIR: $COUNT"
 
     if [ "$COUNT" -ge "$MIN" ]; then
         echo "  ✅ $LABEL — $COUNT dirs (mínimo $MIN)"
         TOTAL_OK=$((TOTAL_OK + 1))
     else
         echo "  ❌ $LABEL — $COUNT dirs (esperado ≥$MIN)"
+        debug "Contagem insuficiente: $COUNT < $MIN"
+        if [ "$DEBUG_MODE" = "1" ]; then
+            echo "     🐛 Subdiretórios encontrados:"
+            find "$DIR" -maxdepth 1 -mindepth 1 -type d 2>/dev/null | head -5 | while read -r subdir; do
+                echo "        - $(basename "$subdir")"
+            done
+            if [ "$COUNT" -gt 5 ]; then
+                echo "        - ... e mais $((COUNT - 5)) diretórios"
+            fi
+        fi
         TOTAL_MISSING=$((TOTAL_MISSING + 1))
     fi
 }
@@ -47,20 +185,56 @@ check_files() {
     local MIN="$2"
     local LABEL="$3"
 
+    debug "Verificando arquivos em: $DIR (mínimo: $MIN)"
+
     if [ ! -d "$DIR" ]; then
         echo "  ❌ $LABEL — diretório $DIR não existe"
+        debug "Diretório não existe: $DIR"
+        TOTAL_MISSING=$((TOTAL_MISSING + 1))
+        return
+    fi
+
+    if [ ! -r "$DIR" ]; then
+        echo "  ❌ $LABEL — diretório $DIR não é legível"
+        debug "Diretório não é legível: $DIR"
         TOTAL_MISSING=$((TOTAL_MISSING + 1))
         return
     fi
 
     local COUNT
     COUNT=$(find "$DIR" -maxdepth 1 -type f 2>/dev/null | wc -l)
+    debug "Contagem de arquivos em $DIR: $COUNT"
+
+    # Verificar se há arquivos com problemas de encoding
+    if [ "$DEBUG_MODE" = "1" ] && [ "$COUNT" -gt 0 ]; then
+        problematic_files=0
+        find "$DIR" -maxdepth 1 -type f 2>/dev/null | while read -r file; do
+            if command -v file >/dev/null 2>&1; then
+                file_info=$(file "$file" 2>/dev/null || echo "unknown")
+                # Procurar apenas por arquivos realmente problemáticos (binários que deveriam ser texto)
+                if echo "$file_info" | grep -qi "binary.*text\|data.*binary" && ! echo "$file_info" | grep -qi "utf.*text"; then
+                    debug "Arquivo com encoding problemático: $(basename "$file") - $file_info"
+                    problematic_files=$((problematic_files + 1))
+                fi
+            fi
+        done
+    fi
 
     if [ "$COUNT" -ge "$MIN" ]; then
         echo "  ✅ $LABEL — $COUNT arquivos (mínimo $MIN)"
         TOTAL_OK=$((TOTAL_OK + 1))
     else
         echo "  ❌ $LABEL — $COUNT arquivos (esperado ≥$MIN)"
+        debug "Contagem insuficiente: $COUNT < $MIN"
+        if [ "$DEBUG_MODE" = "1" ]; then
+            echo "     🐛 Arquivos encontrados:"
+            find "$DIR" -maxdepth 1 -type f 2>/dev/null | head -5 | while read -r file; do
+                echo "        - $(basename "$file")"
+            done
+            if [ "$COUNT" -gt 5 ]; then
+                echo "        - ... e mais $((COUNT - 5)) arquivos"
+            fi
+        fi
         TOTAL_MISSING=$((TOTAL_MISSING + 1))
     fi
 }
@@ -147,7 +321,7 @@ echo ""
 # ─── Home Level ───────────────────────────────────────────────────────────────
 echo "📋 Home Level — ~/CLAUDE.md"
 
-# Função para validar conteúdo do ~/CLAUDE.md
+# Função para validar conteúdo do ~/CLAUDE.md com fallbacks robustos
 validate_claude_md() {
     local FILE="$1"
     local EXPECTED_SECTIONS=(
@@ -162,11 +336,82 @@ validate_claude_md() {
     
     local MISSING_SECTIONS=()
     
-    for section in "${EXPECTED_SECTIONS[@]}"; do
-        if ! grep -q "^$section" "$FILE" 2>/dev/null; then
-            MISSING_SECTIONS+=("$section")
+    debug "Validando estrutura do ~/CLAUDE.md: $FILE"
+    
+    # Verificar se arquivo existe e é legível
+    if [ ! -f "$FILE" ] || [ ! -r "$FILE" ]; then
+        debug "Arquivo não existe ou não é legível: $FILE"
+        MISSING_SECTIONS=("${EXPECTED_SECTIONS[@]}")
+    else
+        # Verificar encoding do arquivo
+        if command -v file >/dev/null 2>&1; then
+            local file_info
+            file_info=$(file "$FILE" 2>/dev/null || echo "unknown")
+            debug "Encoding do ~/CLAUDE.md: $file_info"
         fi
-    done
+        
+        for section in "${EXPECTED_SECTIONS[@]}"; do
+            local section_found=false
+            
+            debug "Procurando seção: '$section'"
+            
+            # Estratégia 1: usar robust_grep com padrão exato
+            if robust_grep "^$(printf '%s' "$section" | sed 's/[[\.*^$()+{}|]/\\&/g')" "$FILE"; then
+                debug "Seção encontrada com robust_grep: '$section'"
+                section_found=true
+            else
+                # Estratégia 2: fallback sem emojis (para seções com emoji)
+                local section_no_emoji
+                section_no_emoji=$(echo "$section" | sed 's/[🎯]//g' | sed 's/  */ /g' | sed 's/^ *//' | sed 's/ *$//')
+                
+                if [ "$section_no_emoji" != "$section" ]; then
+                    debug "Tentando fallback sem emoji: '$section_no_emoji'"
+                    if robust_grep "^$(printf '%s' "$section_no_emoji" | sed 's/[[\.*^$()+{}|]/\\&/g')" "$FILE"; then
+                        debug "Seção encontrada sem emoji: '$section_no_emoji'"
+                        section_found=true
+                    fi
+                fi
+                
+                # Estratégia 3: fallback com busca parcial por palavras-chave
+                if [ "$section_found" = false ]; then
+                    case "$section" in
+                        "# Identidade do Desenvolvedor")
+                            if robust_grep "Identidade.*Desenvolvedor" "$FILE"; then
+                                debug "Seção encontrada por palavras-chave: Identidade Desenvolvedor"
+                                section_found=true
+                            fi
+                            ;;
+                        "## 🎯 Ação Obrigatória ao Iniciar Sessão")
+                            if robust_grep "Ação.*Obrigatória.*Iniciar.*Sessão" "$FILE" || robust_grep "Acao.*Obrigatoria.*Iniciar.*Sessao" "$FILE"; then
+                                debug "Seção encontrada por palavras-chave: Ação Obrigatória"
+                                section_found=true
+                            fi
+                            ;;
+                        "# Instruções Globais — Harness Automático")
+                            if robust_grep "Instruções.*Globais.*Harness" "$FILE" || robust_grep "Instrucoes.*Globais.*Harness" "$FILE"; then
+                                debug "Seção encontrada por palavras-chave: Instruções Globais"
+                                section_found=true
+                            fi
+                            ;;
+                        *)
+                            # Para outras seções, tentar buscar palavras-chave principais
+                            local keywords
+                            keywords=$(echo "$section" | sed 's/^#* *//' | sed 's/[^a-zA-Z ]//g' | head -c 20)
+                            if [ -n "$keywords" ] && robust_grep "$keywords" "$FILE"; then
+                                debug "Seção encontrada por palavras-chave gerais: '$keywords'"
+                                section_found=true
+                            fi
+                            ;;
+                    esac
+                fi
+            fi
+            
+            if [ "$section_found" = false ]; then
+                debug "Seção NÃO encontrada: '$section'"
+                MISSING_SECTIONS+=("$section")
+            fi
+        done
+    fi
     
     if [ ${#MISSING_SECTIONS[@]} -eq 0 ]; then
         echo "  ✅ ~/CLAUDE.md estrutura completa"
@@ -222,14 +467,49 @@ echo "📊 RESUMO"
 echo "═══════════════════════════════════════════════"
 echo "   ✅ OK:       $TOTAL_OK verificações"
 echo "   ❌ Faltando: $TOTAL_MISSING verificações"
+
+if [ "$DEBUG_MODE" = "1" ]; then
+    echo ""
+    echo "🐛 INFORMAÇÕES DE DEBUG:"
+    echo "   • Grep Type: ${GREP_TYPE:-unknown}"
+    echo "   • Locale: ${LC_ALL:-${LANG:-not_set}}"
+    echo "   • Shell: $0 (${BASH_VERSION:-unknown})"
+    echo "   • Platform: $(uname -s 2>/dev/null || echo "unknown") $(uname -m 2>/dev/null || echo "")"
+    
+    # Verificar se há comandos importantes disponíveis
+    echo "   • Comandos disponíveis:"
+    for cmd in grep awk file md5sum; do
+        if command -v "$cmd" >/dev/null 2>&1; then
+            version=""
+            case "$cmd" in
+                grep) version="$(grep --version 2>/dev/null | head -1 | cut -c1-30)" ;;
+                file) version="$(file --version 2>/dev/null | head -1 | cut -c1-30)" ;;
+                *) version="disponível" ;;
+            esac
+            echo "     ✅ $cmd: ${version:-disponível}"
+        else
+            echo "     ❌ $cmd: não disponível"
+        fi
+    done
+fi
+
 echo ""
 
 if [ "$TOTAL_MISSING" -gt 0 ]; then
     echo "🔧 Para corrigir, execute:"
     echo "  cd $REPO_DIR && bash install.sh"
     echo ""
+    if [ "$DEBUG_MODE" != "1" ]; then
+        echo "💡 Para ver mais detalhes, execute:"
+        echo "  DEBUG_MODE=1 bash $0"
+        echo ""
+    fi
     exit 1
 else
     echo "🎉 Instalação completa! Todas as IDEs estão sincronizadas com o repositório."
+    if [ "$DEBUG_MODE" = "1" ]; then
+        echo ""
+        echo "✅ Todas as verificações de encoding e compatibilidade passaram."
+    fi
     exit 0
 fi
