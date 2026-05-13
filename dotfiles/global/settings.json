@@ -14,6 +14,65 @@
         "tool": "TodoWrite"
       },
       "command": "bash ~/.claude/hooks/task-completion.sh"
+    },
+    {
+      "event": "PreMessage",
+      "matcher": {
+        "keywords": ["implementar", "criar", "refatorar", "develop", "build", "fix", "corrigir", "add feature", "bug", "erro", "deploy", "release", "arquitetura", "performance", "security", "migrar", "upgrade"]
+      },
+      "command": "bash ~/.claude/hooks/smart-orchestrator.sh"
     }
+  ],
+  "orchestration": {
+    "auto_quality_check": true,
+    "auto_testing": true,
+    "stack_detection": true,
+    "parallel_gates": true,
+    "power_user_mode": true,
+    "agents_available": 230,
+    "skills_available": 316
+  },
+  "quality_gates": {
+    "architecture": {
+      "enabled": true,
+      "blocking": false,
+      "agents": ["arquitetura-validar-limpa", "arch-clean-architecture-guia"]
+    },
+    "testing": {
+      "enabled": true,
+      "blocking": false,
+      "agents": ["testes-verificador", "testes-executor"]
+    },
+    "security": {
+      "enabled": true,
+      "blocking": true,
+      "agents": ["seguranca-auditor", "seguranca-api"]
+    },
+    "code_quality": {
+      "enabled": true,
+      "blocking": false,
+      "agents": ["orquestracao-qualidade-codigo", "code-aplicar-correcoes"]
+    }
+  },
+  "stack_routing": {
+    "java": ["java-especialista", "framework-spring-guia", "stack-java-guia"],
+    "kotlin": ["kotlin-especialista", "framework-kmp-guia"],
+    "python": ["python-especialista", "framework-fastapi-guia", "stack-python-guia"],
+    "typescript": ["typescript-estrito", "stack-typescript-guia"],
+    "react": ["react-especialista", "framework-react-guia"],
+    "nextjs": ["nextjs-especialista", "framework-nextjs-guia"],
+    "nestjs": ["nestjs-especialista", "nestjs-clean-arch-solid"],
+    "react-native": ["react-native-especialista", "framework-react-native-guia"],
+    "rust": ["rust-especialista", "stack-rust-guia"],
+    "golang": ["go-especialista", "stack-go-guia"],
+    "terraform": ["terraform-arquiteto", "infra-aws"],
+    "docker": ["docker-seguranca", "kubernetes-especialista"]
+  },
+  "master_orchestrators": [
+    "sdd-orquestrador",
+    "qualidade-programa-orquestrador", 
+    "orquestracao-qualidade-codigo",
+    "planejamento-executor",
+    "cicd-validar-release"
   ]
 }
