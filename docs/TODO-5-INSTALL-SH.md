@@ -219,6 +219,12 @@ TODO-6 pode confiar que:
 
 ---
 
+## Extensão (2026-05-16): OpenSpec CLI
+
+O `install.sh` e o `install.ps1` passam a rodar **`npm install -g @fission-ai/openspec@latest`** após a instalação do `~/CLAUDE.md`, quando `npm` está no PATH. Falhas do npm **não** abortam o restante do instalador. Omitir: `SKIP_OPENSPEC_CLI=1` (valor `1`; no PowerShell `$env:SKIP_OPENSPEC_CLI='1'` antes de `.\install.ps1`). Ver `README.md` (seção *Como atualizar e validar*).
+
+---
+
 **Completado em:** 2026-05-11 (implementação)  
 **Duração:** ~5 minutos  
 **Status:** 🟡 **Pronto para TODO-6 (testes e validação)**

@@ -381,6 +381,8 @@ bash scripts/validate-install.sh   # Valida paridade IDE ↔ repositório
 
 O `install.sh` é **idempotente**: na Fase 1 pula arquivos existentes (seguro rodar múltiplas vezes); na Fase 2 sobrescreve com os overlays customizados. Para atualizar o catálogo completo, basta rodar `bash install.sh` novamente.
 
+**OpenSpec CLI (SDD/spec-driven):** após atualizar dotfiles e `~/CLAUDE.md`, o instalador tenta **`npm install -g @fission-ai/openspec@latest`** quando `npm` está no PATH. Recomenda-se **Node.js ≥ 20.19.0**. Falha na instalação global **não** interrompe o restante do harness. Para omitir: `SKIP_OPENSPEC_CLI=1 bash install.sh`. No Windows (`install.ps1`): `$env:SKIP_OPENSPEC_CLI='1'; .\install.ps1` para pular.
+
 O `validate-install.sh` verifica os 35 arquivos de overlay críticos, reportando presença/ausência em cada IDE.
 
 ---
@@ -403,7 +405,7 @@ Para entender o harness profundamente:
 ```
 stec-developer-setup/
 ├── README.md                       # Este arquivo
-├── install.sh                      # Instalador (Fase 1 + Fase 2)
+├── install.sh                      # Instalador (Fase 1 + Fase 2 + OpenSpec CLI opcional)
 ├── install.ps1                     # Instalador Windows PowerShell
 ├── scripts/
 │   ├── detect-env.sh               # Detecção de plataforma (sourced)

@@ -95,6 +95,37 @@ if (-not (Test-Path $HomeClaude)) {
 }
 
 Write-Host ""
+Write-Host "📋 OpenSpec CLI (@fission-ai/openspec)..." -ForegroundColor Cyan
+
+if ($env:SKIP_OPENSPEC_CLI -eq "1") {
+    Write-Host "⏭️  OpenSpec CLI omitido (SKIP_OPENSPEC_CLI=1)." -ForegroundColor Yellow
+}
+elseif (-not (Get-Command npm -ErrorAction SilentlyContinue)) {
+    Write-Host "⚠️  npm não está no PATH. Instale Node.js (≥20.19 recomendado) e depois: npm install -g @fission-ai/openspec@latest" -ForegroundColor Yellow
+}
+else {
+    $prevError = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        npm install -g @fission-ai/openspec@latest 2>&1 | Out-Host
+        if ($LASTEXITCODE -eq 0) {
+            if (Get-Command openspec -ErrorAction SilentlyContinue) {
+                $v = (& openspec --version 2>$null)
+                Write-Host "  ✅ openspec $v" -ForegroundColor Green
+            } else {
+                Write-Host "  ✅ Pacote global instalado; reabra o terminal se openspec não estiver no PATH." -ForegroundColor Green
+            }
+        } else {
+            Write-Host "  ⚠️  Falha no npm install -g — verifique permissões ou rede corporativa." -ForegroundColor Yellow
+            Write-Host "     Manual: npm install -g @fission-ai/openspec@latest" -ForegroundColor Yellow
+        }
+    } catch {
+        Write-Host "  ⚠️  Erro ao instalar OpenSpec CLI: $($_.Exception.Message)" -ForegroundColor Yellow
+    }
+    $ErrorActionPreference = $prevError
+}
+
+Write-Host ""
 Write-Host "✨ Instalação concluída!" -ForegroundColor Green
 Write-Host ""
 Write-Host "📋 Resumo:" -ForegroundColor Cyan
@@ -102,6 +133,7 @@ Write-Host "  • ~/CLAUDE.md — Instrução imperativa (lido automaticamente)"
 Write-Host "  • ~/.claude/ (AppData\Claude) — Claude Code harness"
 Write-Host "  • ~/.cursor/ — Cursor harness"
 Write-Host "  • ~/.codex/ — Codex CLI harness"
+Write-Host "  • OpenSpec CLI (global) quando npm disponível — SKIP_OPENSPEC_CLI=1 para pular"
 Write-Host ""
 Write-Host "📝 Próximos passos:" -ForegroundColor Cyan
 Write-Host "  1. Abrir novo PowerShell/Cursor/Claude"

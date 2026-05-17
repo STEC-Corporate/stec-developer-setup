@@ -201,6 +201,61 @@ fi
 echo ""
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# OpenSpec CLI — npm global (spec-driven / OPSX; Fission-AI)
+# Opcional via SKIP_OPENSPEC_CLI=1; não falha o harness se npm falhar
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+install_openspec_cli() {
+    if [[ "${SKIP_OPENSPEC_CLI:-0}" == "1" ]]; then
+        echo "📋 OpenSpec CLI — omitido (SKIP_OPENSPEC_CLI=1)"
+        echo ""
+        return 0
+    fi
+
+    if ! command -v npm >/dev/null 2>&1; then
+        echo "⚠️  OpenSpec CLI — npm não está no PATH."
+        echo "     Com Node instalado (≥20.19 recomendado): npm install -g @fission-ai/openspec@latest"
+        echo ""
+        return 0
+    fi
+
+    if command -v node >/dev/null 2>&1; then
+        _vn="$(node -p "process.versions.node" 2>/dev/null || printf '%s\n' "")"
+        if [[ -n "$_vn" ]]; then
+            _maj="${_vn%%.*}"
+            _rest="${_vn#*.}"
+            _min="${_rest%%.*}"
+            if [[ "$_maj" -lt 20 ]] || [[ "$_maj" -eq 20 && "$_min" -lt 19 ]]; then
+                echo "⚠️  Node $_vn — recomendamos ≥20.19.0 para OpenSpec; tentando mesmo assim."
+            fi
+        fi
+        unset _vn _maj _rest _min
+    fi
+
+    echo "📋 OpenSpec CLI (@fission-ai/openspec)"
+
+    set +e
+    npm install -g @fission-ai/openspec@latest
+    NPM_OPENSPEC=$?
+    set -e
+
+    if [[ "$NPM_OPENSPEC" -eq 0 ]]; then
+        if command -v openspec >/dev/null 2>&1; then
+            _VER="$(openspec --version 2>/dev/null || true)"
+            echo "  ✅ openspec${_VER:+ ($_VER)}"
+        else
+            echo "  ✅ Pacote global instalado; se openspec não aparecer no terminal, feche e reabra a sessão (PATH)."
+        fi
+    else
+        echo "  ⚠️  Falha ao rodar npm install -g — permissões sudo em alguns setups, rede ou mirror npm."
+        echo "     Manual: npm install -g @fission-ai/openspec@latest"
+    fi
+    echo ""
+}
+
+install_openspec_cli
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # RESUMO FINAL
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -215,6 +270,9 @@ echo "  • ~/.claude/             — Claude Code: skills + rules + mcp + scrip
 echo "  • ~/.cursor/             — Cursor IDE: skills + rules + agents + hooks + scripts (+ customizações)"
 echo "  • ~/.codex/              — Codex CLI: skills + rules + agents + hooks + scripts (+ customizações)"
 echo "  • ~/CLAUDE.md            — Instrução imperativa (lido automaticamente)"
+echo ""
+echo "📦 OpenSpec:"
+echo "  • openspec CLI (global) quando npm disponível — use SKIP_OPENSPEC_CLI=1 para pular"
 echo ""
 echo "🔍 Validar instalação:"
 echo "  bash $REPO_DIR/scripts/validate-install.sh"
