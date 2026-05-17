@@ -2,11 +2,98 @@
 
 ## 📋 Índice
 
-1. [TypeScript Strict Mode](#typescript-strict-mode)
-2. [Next.js e React](#nextjs-e-react)
-3. [Radix UI e Componentes](#radix-ui-e-componentes)
-4. [Clean Architecture](#clean-architecture)
-5. [ESLint (lint:strict)](#eslint-lintstrict)
+1. [Module Federation + Next.js](#module-federation--nextjs)
+2. [TypeScript Strict Mode](#typescript-strict-mode)
+3. [Next.js e React](#nextjs-e-react)
+4. [Radix UI e Componentes](#radix-ui-e-componentes)
+5. [Clean Architecture](#clean-architecture)
+6. [ESLint (lint:strict)](#eslint-lintstrict)
+
+---
+
+## Module Federation + Next.js
+
+### ❌ Erro 1: ESLint 9 + Next.js 14.0.4 Incompatibilidade
+
+**Sintoma:**
+```
+TypeError: eslint.getRules is not a function
+```
+
+**Causa:** Next.js 14.0.4 não suporta ESLint 9 nativamente
+
+**✅ Solução:**
+```json
+// package.json - downgrade ESLint
+"eslint": "^8.57.0"
+```
+
+**Validado em:** NewsLink T032 (2026-05-15)
+
+### ❌ Erro 2: Jest + JSDOM - APIs de Browser
+
+**Sintoma:**
+```
+ReferenceError: matchMedia is not defined
+ReferenceError: ResizeObserver is not defined
+```
+
+**Causa:** APIs de browser não existem no ambiente Jest + JSDOM
+
+**✅ Solução:**
+```javascript
+// jest.setup.js
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: jest.fn().mockImplementation(query => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  })),
+});
+
+global.ResizeObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+}));
+```
+
+**Validado em:** NewsLink T032 (2026-05-15)
+
+### ✅ Config: Webpack Module Federation Next.js
+
+**Configuração funcional:**
+```javascript
+// next.config.js
+const { ModuleFederationPlugin } = require('@module-federation/nextjs-mf');
+
+module.exports = {
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.plugins.push(
+        new ModuleFederationPlugin({
+          name: 'newsShell',
+          filename: 'static/chunks/remoteEntry.js',
+          exposes: {
+            './NewsShell': './components/NewsShell',
+            './NavigationSidebar': './components/NavigationSidebar',
+          },
+          shared: ['react', 'react-dom'],
+        })
+      );
+    }
+    return config;
+  },
+};
+```
+
+**Validado em:** NewsLink T032 (2026-05-15)
 
 ---
 

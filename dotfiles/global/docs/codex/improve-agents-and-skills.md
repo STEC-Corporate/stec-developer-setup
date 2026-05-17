@@ -16,6 +16,7 @@
 | C9. Definir estratégia de desacoplamento | P2 | M | Médio | C7, C8, D10 |
 | D11. Revisar rules específicas de projeto | P2 | P | Baixo | C9 recomendado |
 | D12. Especificar lint estrutural do catálogo | P2 | M | Baixo | D10 |
+| E13. Implementar melhorias Module Federation (NewsLink T032) | P1 | G | Médio | Nenhuma |
 
 ## Detalhamento
 
@@ -212,6 +213,42 @@ Aceite:
 Status:
 - concluído em [cursor-catalog-lint-spec.md](/home/jesus/Projetos/RAG-Memories/.cursor/docs/codex/cursor-catalog-lint-spec.md)
 
+### E13. Implementar melhorias Module Federation (NewsLink T032)
+
+**Origem:** Aprendizados da tarefa T032 do projeto NewsLink (Next.js + Module Federation)
+
+Arquivos a criar:
+- `dotfiles/global/agents/module-federation-especialista.md` 
+- `dotfiles/global/agents/testes-e2e-mocks-especialista.md`
+- `dotfiles/global/agents/design-system-mfe-especialista.md`
+- `dotfiles/global/skills/framework-module-federation-setup/SKILL.md`
+- `dotfiles/global/skills/testes-jest-setup-frontend/SKILL.md`
+- `dotfiles/global/skills/design-system-css-variables/SKILL.md`
+- `dotfiles/global/hooks/eslint-compatibility-validator.sh`
+- `dotfiles/global/hooks/frontend-quality-gates.sh`
+
+Descobertas técnicas a documentar:
+- Incompatibilidade ESLint 9 + Next.js 14.0.4 (workarounds testados)
+- Mocks necessários para hooks de responsividade (matchMedia, ResizeObserver)
+- Padrões de API externa para controle de micro frontends
+- Estrutura ideal de design system para componentes exportáveis
+- Templates de jest.setup.js com mocks comuns
+- Workflow de quality gates específicos para frontend
+
+Aceite:
+- Agents criados seguindo padrão `operacional-v1` existente
+- Skills implementadas com templates funcionais
+- Hooks testados em projeto real (NewsLink)
+- Documentação técnica das descobertas arquivada
+- Catálogo de frameworks atualizado incluindo Module Federation
+
+Risco: Médio
+- Requer validação dos novos agents em projetos frontend
+- Hooks dependem de estrutura específica de projetos Next.js
+- Templates precisam ser testados em diferentes versões
+
+Status: Pendente
+
 ## Sequência de Execução Recomendada
 
 1. A1
@@ -226,6 +263,7 @@ Status:
 10. C9
 11. D11
 12. D12
+13. E13
 
 ## Sugestão prática
 

@@ -25,6 +25,7 @@ Cada entrada liga um **framework de mercado** a um agente especializado, uma ski
 | A | NestJS | `framework-nestjs-guia.md` | `framework-nestjs/` | `framework-nestjs.mdc` | stable |
 | A | React | `framework-react-guia.md` | `framework-react/` | `framework-react.mdc` | stable |
 | A | Next.js | `framework-nextjs-guia.md` | `framework-nextjs/` | `framework-nextjs.mdc` | stable |
+| A | Module Federation | `framework-module-federation-guia.md` | `framework-module-federation/` | `framework-module-federation.mdc` | experimental |
 | A | Vue | `framework-vue-guia.md` | `framework-vue/` | `framework-vue.mdc` | stable |
 | A | Angular | `framework-angular-guia.md` | `framework-angular/` | `framework-angular.mdc` | stable |
 | A | React Native | `framework-react-native-guia.md` | `framework-react-native/` | `framework-react-native.mdc` | stable |

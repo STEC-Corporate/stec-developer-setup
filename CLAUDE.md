@@ -117,3 +117,52 @@ Isto garante que toda atualização em `dotfiles/` seja **sempre** refletida em 
 - `dotfiles/global/docs/hooks.md` (documentar novo hook)
 
 **Prioridade:** Alta - melhora fluxo de trabalho com tarefas
+
+### 🚀 T-SETUP-002: Melhorias Module Federation (NewsLink T032)
+**Origem:** Aprendizados da tarefa T032 - Next.js + Module Federation no projeto NewsLink
+
+**Descrição:** Implementar agents, skills, hooks e commands identificados durante desenvolvimento de micro frontend:
+
+**AGENTS NECESSÁRIOS:**
+- `module-federation-especialista.md` - Webpack 5 + configurações avançadas
+- `testes-e2e-mocks-especialista.md` - JSDOM + mocks para componentes Next.js
+- `design-system-mfe-especialista.md` - CSS Variables + responsividade para export
+
+**SKILLS NECESSÁRIAS:**
+- `framework-module-federation-setup.md` - Setup automatizado de projetos MFE
+- `testes-jest-setup-frontend.md` - Templates padronizados com mocks comuns
+- `design-system-css-variables.md` - Patterns de design system exportável
+
+**HOOKS NECESSÁRIOS:**
+- `eslint-compatibility-validator.sh` - Detectar problemas ESLint 9 + Next.js 14.0.4
+- `frontend-quality-gates.sh` - Validar build, tipos, testes, linting automaticamente
+
+**COMMANDS NECESSÁRIOS:**
+- `scaffold-microfrontend.md` - Setup rápido de micro frontends
+- `validate-mfe-compatibility.md` - Verificar versões Next.js + ESLint + TypeScript
+
+**TEMPLATES/WORKFLOWS:**
+- Template `jest.setup.js` com mocks (matchMedia, ResizeObserver)
+- Workflow de quality gates para projetos frontend
+- Documentação de API externa para controle de MFE
+
+**DESCOBERTAS TÉCNICAS DOCUMENTADAS:**
+- Incompatibilidade ESLint 9 + Next.js 14.0.4 (soluções testadas)
+- Mocks necessários para hooks de responsividade
+- Padrões de roteamento e comunicação entre micro frontends
+- Estrutura ideal de design system para componentes exportáveis
+
+**Implementação:**
+- Criar agents em `dotfiles/global/agents/`
+- Criar skills em `dotfiles/global/skills/`
+- Criar hooks em `dotfiles/global/hooks/`
+- Documentar em `dotfiles/global/docs/`
+- Atualizar `install.sh` para distribuir novos assets
+
+**Arquivos afetados:**
+- `dotfiles/global/agents/module-federation-especialista.md` (novo)
+- `dotfiles/global/skills/framework-module-federation-setup/` (novo)
+- `dotfiles/global/hooks/eslint-compatibility-validator.sh` (novo)
+- `dotfiles/global/docs/governanca/catalogo-frameworks-ia.md` (atualizar)
+
+**Prioridade:** Alta - assets críticos para projetos frontend modernos
